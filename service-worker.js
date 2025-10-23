@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osrs-planner-v1';
+const CACHE_NAME = 'osrs-planner-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,9 +8,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -27,7 +25,6 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   event.respondWith(
     caches.match(req).then((res) => res || fetch(req).then((netRes) => {
-      // For same-origin GET requests, update cache
       if (req.method === 'GET' && new URL(req.url).origin === location.origin) {
         const clone = netRes.clone();
         caches.open(CACHE_NAME).then((cache)=> cache.put(req, clone));
