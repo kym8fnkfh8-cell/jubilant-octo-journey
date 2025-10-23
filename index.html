@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OSRS Skilling Planner — PWA</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f0f14" />
+<style>
+  :root {
+    --bg: #0f0f14;
+    --panel: #171a22;
+    --muted: #9aa3b2;
+    --text: #e6e9ef;
+    --accent: #6ee7b7;
+    --accent-2: #8ab4f8;
+    --danger: #f97070;
+    --good: #86efac;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+  a { color: var(--accent-2); }
+  .wrap { max-width: 980px; margin: 24px auto 80px; padding: 0 16px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom: 16px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: 0.3px; }
+  .boot { font-size: 12px; padding:6px 8px; border-radius: 999px; border:1px solid #2a2f45; background:#10131a; color: var(--muted); }
+  .boot.ok { color: var(--good); border-color:#214a2e; }
+  .card { background: var(--panel); border: 1px solid #222635; border-radius: 12px; padding: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+  .span-4 { grid-column: span 4; }
+  .span-12 { grid-column: 1 / -1; }
+  label { display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  input[type="number"], input[type="date"], input[type="text"] { width: 100%; background:#0d1017; border: 1px solid #272a36; color: var(--text); padding: 10px 12px; border-radius: 9px; }
+  input[type="range"] { width: 100%; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
+  .kpi { display:flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; background: #10131a; border: 1px solid #23283a; }
+  .kpi .big { font-weight: 700; font-size: 22px; }
+  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid #2a2f45; background:#111522; font-size: 12px; color:var(--muted); }
+  .good { color: var(--good); }
+  .danger { color: var(--danger); }
+  .accent { color: var(--accent); }
+  .btn { appearance:none; border:1px solid #2a2f45; background:#10131a; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; }
+  .btn:hover { background:#0c1018; }
+  .btn.primary { background: linear-gradient(90deg, #24c8a8, #5fb3ff); border: none; color:#081018; font-weight: 700; }
+  .btn.small { padding:8px 10px; font-size: 12px; }
+  .week { display:grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-top: 8px; }
+  .day { background:#0f1320; border: 1px solid #23283a; border-radius: 10px; padding: 10px; }
+  .day h4 { margin: 0 0 6px; font-size: 13px; color:#c2c9d6; letter-spacing: 0.2px; }
+  .hr-row { display:flex; align-items:center; gap:8px; }
+  .hr { width:60px; text-align:right; padding:6px 8px; border-radius:8px; border:1px solid #2a2f45; background:#0d1017; color:var(--text); }
+  .subtle { color: var(--muted); font-size: 12px; }
+  .total-row { display:flex; align-items:center; justify-content:space-between; padding:12px; border-top:1px dashed #2a2f45; margin-top:8px; }
+  .footer { margin-top: 18px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .badge { font-size: 12px; padding:6px 8px; background:#10131a; border:1px solid #2a2f45; border-radius:8px; }
+  .right { margin-left:auto; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="row">
+        <h1>OSRS Skilling Planner</h1>
+        <span id="bootBadge" class="boot">JS: starting…</span>
+      </div>
+      <div class="row">
+        <button id="saveBtn" class="btn small">Save</button>
+        <button id="loadBtn" class="btn small">Load</button>
+        <button id="resetBtn" class="btn small">Reset</button>
+        <button id="exportBtn" class="btn small">Export JSON</button>
+        <input id="importInput" type="file" accept=".json" style="display:none" />
+        <button id="importBtn" class="btn small">Import JSON</button>
+        <button id="addWeekBtn" class="btn primary">+ Add Week</button>
+      </div>
+    </header>
+
+    <div class="card grid">
+      <div class="span-4">
+        <label for="xpRemaining">XP to goal</label>
+        <input id="xpRemaining" type="number" min="0" step="1" placeholder="e.g. 3,000,000" />
+      </div>
+      <div class="span-4">
+        <label for="xpPerHour">XP per hour</label>
+        <input id="xpPerHour" type="number" min="1" step="1" placeholder="e.g. 90,000" />
+      </div>
+      <div class="span-4">
+        <label for="startDate">Start date (optional)</label>
+        <input id="startDate" type="date" />
+      </div>
+
+      <div class="span-12 row">
+        <div class="kpi">
+          <span class="subtle">Hours needed</span>
+          <span id="hoursNeeded" class="big">0</span>
+        </div>
+        <div class="kpi">
+          <span class="subtle">Hours allocated (all weeks)</span>
+          <span id="hoursAllocated" class="big">0</span>
+        </div>
+        <div class="kpi">
+          <span class="subtle">Hours remaining</span>
+          <span id="hoursRemaining" class="big">0</span>
+        </div>
+        <div class="kpi">
+          <span class="subtle">Projected finish (est.)</span>
+          <span id="eta" class="big">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="weeks"></div>
+
+    <div class="footer">
+      <span class="badge">Install: Share → Add to Home Screen (Safari).</span>
+      <span class="badge">Works offline after first open.</span>
+    </div>
+  </div>
+
+<script>
+// PWA: register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+
+(function(){
+  const bootBadge = document.getElementById("bootBadge");
+  const flipBootOk = () => { bootBadge.textContent = "JS: OK"; bootBadge.classList.add("ok"); };
+  try { flipBootOk(); } catch(e) {}
+
+  const byId = (id)=>document.getElementById(id);
+  const weeksEl = byId("weeks");
+  const xpRemainingEl = byId("xpRemaining");
+  const xpPerHourEl = byId("xpPerHour");
+  const startDateEl = byId("startDate");
+  const hoursNeededEl = byId("hoursNeeded");
+  const hoursAllocatedEl = byId("hoursAllocated");
+  const hoursRemainingEl = byId("hoursRemaining");
+  const etaEl = byId("eta");
+
+  const MAX_HOURS_PER_DAY = 24;
+  let state = {
+    xpRemaining: 0,
+    xpPerHour: 1,
+    startDate: "",
+    weeks: []
+  };
+
+  function ceil2(n){ return Math.ceil(n * 100) / 100; }
+  function computeHoursNeeded(){
+    const xpRem = Number(state.xpRemaining) || 0;
+    const rate = Math.max(1, Number(state.xpPerHour) || 1);
+    return xpRem <= 0 ? 0 : ceil2(xpRem / rate);
+  }
+  function sumAllocated(){
+    return ceil2(state.weeks.flat().reduce((a,b)=>a + (Number(b)||0), 0));
+  }
+  function hoursRemaining(){
+    return Math.max(0, ceil2(computeHoursNeeded() - sumAllocated()));
+  }
+  function formatHours(h){
+    if (h === 0) return "0";
+    const frac = h - Math.floor(h);
+    return frac === 0 ? String(Math.floor(h)) : h.toFixed(2);
+  }
+  function estimateFinishDate(){
+    if (!state.startDate) return "";
+    const need = computeHoursNeeded();
+    if (need <= 0) return "";
+    const start = new Date(state.startDate + "T00:00:00");
+    let remaining = need;
+    for (let w = 0; w < state.weeks.length; w++){
+      for (let d = 0; d < 7; d++){
+        remaining -= Number(state.weeks[w][d]) || 0;
+        if (remaining <= 0){
+          const doneDate = new Date(start);
+          const offsetDays = (w * 7) + d;
+          doneDate.setDate(doneDate.getDate() + offsetDays);
+          return doneDate.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric'});
+        }
+      }
+    }
+    return "";
+  }
+  function render(){
+    hoursNeededEl.textContent = formatHours(computeHoursNeeded());
+    hoursAllocatedEl.textContent = formatHours(sumAllocated());
+    const rem = hoursRemaining();
+    hoursRemainingEl.textContent = formatHours(rem);
+    hoursRemainingEl.classList.toggle("danger", rem > 0);
+    const eta = estimateFinishDate();
+    etaEl.textContent = eta || "—";
+    try { localStorage.setItem("osrs_skilling_plan", JSON.stringify(state)); } catch {}
+  }
+  function weekTemplate(index){
+    const total = ceil2(state.weeks[index].reduce((a,b)=>a + (Number(b)||0), 0));
+    return `
+      <div class="card" data-week="${index}">
+        <div class="row" style="justify-content:space-between; margin-bottom:8px;">
+          <div class="pill">Week ${index + 1}</div>
+          <div class="row">
+            <div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
+            <button class="btn small" data-act="dup">Duplicate</button>
+            <button class="btn small" data-act="clear">Clear</button>
+            <button class="btn small" data-act="del">Delete</button>
+          </div>
+        </div>
+        <div class="week">
+          ${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d, i)=>`
+            <div class="day">
+              <h4>${d}</h4>
+              <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i] || 0}" data-day="${i}" />
+              <div class="hr-row">
+                <span class="subtle">Hours</span>
+                <input class="hr" type="number" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i] || 0}" data-day="${i}" />
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="total-row subtle">
+          <span>Tip: hold <strong>Shift</strong> to fine-tune the slider.</span>
+          <span>Week total: <strong>${formatHours(total)}</strong> h</span>
+        </div>
+      </div>
+    `;
+  }
+  function mountWeeks(){
+    document.getElementById("weeks").innerHTML = state.weeks.map((_, i)=>weekTemplate(i)).join("");
+  }
+  function ensureOneWeek(){
+    if (!state.weeks.length) state.weeks.push(Array(7).fill(0));
+  }
+
+  // Event wiring
+  document.getElementById("weeks").addEventListener("input", (e)=>{
+    const card = e.target.closest("[data-week]"); if (!card) return;
+    const w = Number(card.getAttribute("data-week"));
+    const day = Number(e.target.getAttribute("data-day"));
+    if (!Number.isInteger(w) || !Number.isInteger(day)) return;
+    const val = Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value) || 0));
+    state.weeks[w][day] = val;
+    const siblings = card.querySelectorAll(`[data-day="${day}"]`);
+    siblings.forEach(inp => { if (inp !== e.target) inp.value = val; });
+    const total = state.weeks[w].reduce((a,b)=>a + (Number(b)||0), 0);
+    card.querySelector(".total-row span:last-child strong").textContent = formatHours(Math.ceil(total*100)/100);
+    render();
+  });
+
+  document.getElementById("weeks").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button[data-act]"); if (!btn) return;
+    const card = e.target.closest("[data-week]"); const w = Number(card.getAttribute("data-week"));
+    const act = btn.getAttribute("data-act");
+    if (act === "dup") { state.weeks.push([...(state.weeks[w]||Array(7).fill(0))]); }
+    if (act === "clear") { state.weeks[w] = Array(7).fill(0); }
+    if (act === "del") { state.weeks.splice(w,1); }
+    ensureOneWeek(); mountWeeks(); render();
+  });
+
+  document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); render(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:default", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{
+    const raw = localStorage.getItem("osrs_skilling_plan_named:default");
+    if (!raw) return alert("No saved plan found.");
+    state = JSON.parse(raw); hydrate(); mountWeeks(); render();
+  });
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    if (!confirm("Reset everything?")) return;
+    state = { xpRemaining:0, xpPerHour:1, startDate:"", weeks:[Array(7).fill(0)] };
+    hydrate(); mountWeeks(); render();
+  });
+  document.getElementById("exportBtn").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob); const a = document.createElement("a");
+    a.href = url; a.download = "osrs_skilling_plan.json"; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  });
+  document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importInput").click());
+  document.getElementById("importInput").addEventListener("change", (e)=>{
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { state = JSON.parse(reader.result); hydrate(); mountWeeks(); render(); }
+      catch { alert("Invalid JSON"); }
+    }; reader.readAsText(file);
+  });
+
+  function hydrate(){
+    xpRemainingEl.value = state.xpRemaining || 0;
+    xpPerHourEl.value = state.xpPerHour || 1;
+    startDateEl.value = state.startDate || "";
+  }
+  [xpRemainingEl, xpPerHourEl, startDateEl].forEach(el=> el.addEventListener("input", ()=>{
+    state.xpRemaining = Number(xpRemainingEl.value) || 0;
+    state.xpPerHour = Number(xpPerHourEl.value) || 1;
+    state.startDate = startDateEl.value || "";
+    render();
+  }));
+
+  // boot
+  try { const saved = localStorage.getItem("osrs_skilling_plan"); if (saved) state = JSON.parse(saved); } catch {}
+  if (!Array.isArray(state.weeks)) state.weeks = [];
+  ensureOneWeek(); hydrate(); mountWeeks(); render();
+})();
+</script>
+</body>
+</html>
