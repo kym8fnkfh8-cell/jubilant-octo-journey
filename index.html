@@ -3,23 +3,40 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4 (Hiscores + Theme)</title>
+<title>OSRS Skilling Planner — v4.1</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b0d12" />
 <style>
-  :root { --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45; --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d; --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac; }
+  :root {
+    --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45;
+    --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d;
+    --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac;
+  }
   *{ box-sizing:border-box; }
-  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
+  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);
+    font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
+  /* Subtle runes background */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.08;
+    background:
+      radial-gradient(600px 300px at 20% 10%, #8ab4f8 0, transparent 60%),
+      radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
+      radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
+    filter: blur(40px);
+  }
   a{ color:var(--accent-2); }
   .wrap{ max-width:1000px; margin:18px auto 80px; padding:0 14px; }
   header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; }
   .brand{ display:flex;align-items:center;gap:10px; }
-  h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
-  .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));border:1px solid var(--edge);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.35); }
+  h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);
+    text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
+  .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));
+    border:1px solid var(--edge); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
   .grid{ display:grid;grid-template-columns:repeat(12,1fr);gap:12px; }
   .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
   label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
-  input[type="number"],input[type="date"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
+  input[type="number"],input[type="date"],input[type="text"],select{
+    width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
   input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input[type="number"]{ -moz-appearance:textfield }
   input[type="range"]{ width:100%;margin:8px 6px;-webkit-appearance:none;background:transparent }
@@ -28,7 +45,7 @@
   input[type="range"]::-moz-range-track{ height:10px;border-radius:999px;background:#2b3146 }
   input[type="range"]::-moz-range-thumb{ width:26px;height:26px;border-radius:50%;background:#8ab4f8;border:2px solid #0f1424 }
   .row{ display:flex;gap:12px;align-items:center;flex-wrap:wrap }
-  .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700 }
+  .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700 }
   .btn:hover{ filter:brightness(1.05) }
   .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
   .pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a2f45;background:#111522;font-size:12px;color:var(--muted) }
@@ -44,10 +61,9 @@
   .hr{ width:90px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
   .badge{ font-size:12px;padding:6px 8px;background:#10131a;border:1px solid #2a2f45;border-radius:8px }
   .muted{ color:var(--muted) }
-  .skill-row{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px }
-  @media (max-width:740px){ .skill-row{ grid-template-columns:1fr } }
-  .icon{ width:18px;height:18px;vertical-align:text-bottom }
-  .titleline{ display:flex;align-items:center;gap:10px }
+  .error{ color:var(--danger) }
+  .success{ color:var(--good) }
+  .small{ font-size:12px }
 </style>
 </head>
 <body>
@@ -55,7 +71,7 @@
     <header>
       <div class="brand">
         <h1>OSRS Skilling Planner</h1>
-        <span class="pill">v4</span>
+        <span class="pill">v4.1</span>
       </div>
       <div class="row">
         <button id="saveBtn" class="btn outline">Save</button>
@@ -77,8 +93,9 @@
         <label>&nbsp;</label>
         <div class="row">
           <button id="fetchBtn" class="btn">Fetch Hiscores</button>
-          <span id="fetchMsg" class="muted"></span>
+          <span id="fetchMsg" class="muted small"></span>
         </div>
+        <div class="small muted" style="margin-top:6px;">Needs internet; if blocked, check Safari privacy settings.</div>
       </div>
       <div class="span-4">
         <label for="startDate">Start date (optional)</label>
@@ -86,28 +103,44 @@
       </div>
 
       <div class="span-12 card" style="border-color:#4a3b1a">
-        <div class="titleline"><span class="pill">🎯 Goal setup</span></div>
-        <div class="skill-row" style="margin-top:10px;">
-          <div>
+        <div class="pill">🎯 Goal setup</div>
+        <div class="grid" style="margin-top:10px;gap:12px;grid-template-columns:repeat(12,1fr)">
+          <div class="span-4">
             <label for="skill">Skill</label>
             <select id="skill"></select>
           </div>
-          <div>
+          <div class="span-4">
             <label for="targetLevel">Target level</label>
             <select id="targetLevel"></select>
           </div>
-          <div>
+          <div class="span-4">
             <label for="xpPerHour">XP per hour</label>
             <input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" />
           </div>
-        </div>
 
-        <div class="grid" style="margin-top:10px;">
-          <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted">from hiscores</span></div></div>
-          <div class="span-3"><label>Current XP</label><div class="kpi"><span class="big" id="curXp">—</span><span class="muted">from hiscores</span></div></div>
-          <div class="span-3"><label>Target XP</label><div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted">calc from level</span></div></div>
-          <div class="span-3"><label>XP to goal</label><div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted">tgt - current</span></div></div>
-          <div class="span-12" style="margin-top:6px;"><div class="progress"><div id="progressFill"></div></div></div>
+          <div class="span-3">
+            <label>Current level</label>
+            <div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div>
+          </div>
+          <div class="span-3">
+            <label>Current XP</label>
+            <div class="kpi"><span class="big" id="curXp">—</span><span class="muted small">from hiscores</span></div>
+          </div>
+          <div class="span-3">
+            <label>Target XP</label>
+            <div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted small">calc from level</span></div>
+          </div>
+          <div class="span-3">
+            <label>XP to goal</label>
+            <div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted small">tgt - current</span></div>
+          </div>
+
+          <div class="span-12" style="margin-top:6px;">
+            <div class="progress"><div id="progressFill"></div></div>
+          </div>
+          <div class="span-12 small muted" id="lastUpdatedRow" style="display:none;">
+            Last hiscores sync: <span id="lastUpdated"></span>
+          </div>
         </div>
       </div>
 
@@ -122,13 +155,15 @@
     <div id="weeks"></div>
 
     <div class="row" style="margin-top:12px;">
-      <span class="badge">Tip: tap a number field once → it auto-selects so you can type.</span>
+      <span class="badge">Auto-select inputs on tap (no sneaky zeros).</span>
       <span class="badge">Works offline after first load.</span>
     </div>
   </div>
 
 <script>
+// XP table (levels 1..126)
 const XP_TABLE = (() => { const arr=[0]; let points=0; for (let lvl=1; lvl<=126; lvl++){ points += Math.floor(lvl + 300 * Math.pow(2, lvl/7)); arr[lvl] = Math.floor(points/4); } return arr; })();
+// Skills (hiscore indexes)
 const SKILLS = [
   { name: "Attack", idx: 1 },{ name: "Defence", idx: 2 },{ name: "Strength", idx: 3 },{ name: "Hitpoints", idx: 4 },
   { name: "Ranged", idx: 5 },{ name: "Prayer", idx: 6 },{ name: "Magic", idx: 7 },{ name: "Cooking", idx: 8 },
@@ -137,14 +172,18 @@ const SKILLS = [
   { name: "Agility", idx: 17 },{ name: "Thieving", idx: 18 },{ name: "Slayer", idx: 19 },{ name: "Farming", idx: 20 },
   { name: "Runecraft", idx: 21 },{ name: "Hunter", idx: 22 },{ name: "Construction", idx: 23 },
 ];
+
 (function(){
   const byId=(id)=>document.getElementById(id);
   const weeksEl=byId("weeks"), rsnEl=byId("rsn"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg");
   const skillSel=byId("skill"), targetSel=byId("targetLevel"), xpPerHourEl=byId("xpPerHour"), startDateEl=byId("startDate");
   const curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
   const hoursNeededEl=byId("hoursNeeded"), hoursAllocatedEl=byId("hoursAllocated"), hoursRemainingEl=byId("hoursRemaining"), etaEl=byId("eta");
+  const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated");
+
   const MAX_HOURS_PER_DAY=24;
-  let state={ rsn:rsnEl.value||"", skillIdx:SKILLS[0].idx, targetLevel:99, xpPerHour:90000, startDate:"", hiscores:null, weeks:[Array(7).fill(0)] };
+  let state={ rsn:rsnEl.value||"", skillIdx:SKILLS[0].idx, targetLevel:99, xpPerHour:90000, startDate:"",
+    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
 
   function populateSkills(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); }
   function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===99?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
@@ -164,7 +203,8 @@ const SKILLS = [
     const remainingH=Math.max(0, ceil2(hoursNeeded-allocated)); hoursRemainingEl.textContent=formatHours(remainingH); hoursRemainingEl.classList.toggle("danger", remainingH>0);
     const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
     const eta=estimateFinishDate(hoursNeeded); etaEl.textContent=eta||"—";
-    try{ localStorage.setItem("osrs_skilling_plan_v4", JSON.stringify(state)); }catch{}
+    if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
+    try{ localStorage.setItem("osrs_skilling_plan_v4_1", JSON.stringify(state)); }catch{}
   }
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
     return `<div class="card" data-week="${index}">
@@ -205,34 +245,83 @@ const SKILLS = [
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
   document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); });
-  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4", JSON.stringify(state)); alert("Saved!"); });
-  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
   document.getElementById("resetBtn").addEventListener("click", ()=>{ if(!confirm("Reset everything?")) return; state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); });
-  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
+  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
   document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importInput").click());
   document.getElementById("importInput").addEventListener("change", (e)=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); hydrate(); mountWeeks(); updateKpis(); }catch{ alert("Invalid JSON"); } }; r.readAsText(f); });
 
+  // Robust hiscore fetch with two CORS-friendly proxies and direct mode
   async function fetchHiscores(name){
-    fetchMsg.textContent="Fetching…"; const encoded=encodeURIComponent(name);
-    const url=`https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=${encoded}`;
-    try{ let res=await fetch(url, {mode:'cors'}); if(!res.ok) throw new Error("HTTP "+res.status); const txt=await res.text(); parseHiscores(txt); fetchMsg.textContent="Loaded (direct)"; }
-    catch(e){ try{ let res=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`); if(!res.ok) throw new Error("Proxy HTTP "+res.status); const txt=await res.text(); parseHiscores(txt); fetchMsg.textContent="Loaded (via proxy)"; }
-      catch(e2){ console.error(e2); fetchMsg.textContent="Failed to fetch hiscores. You can still enter XP/hr manually."; state.hiscores=null; } }
+    const encoded=encodeURIComponent(name);
+    const direct = `https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=${encoded}`;
+    const proxies = [
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(direct)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`
+    ];
+    const tries = [ {url: direct, label: "direct"}, *proxies.map(p=>({url:p, label:"proxy"})) ];
+
+    fetchMsg.textContent="Fetching…";
+    fetchMsg.className="muted small";
+    let lastError=null, text=null;
+    for (const t of tries){
+      try{
+        const res = await fetch(t.url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        text = await res.text();
+        if (!text || !text.includes(",")) throw new Error("Unexpected response");
+        parseHiscores(text);
+        state.lastUpdated = Date.now();
+        fetchMsg.textContent = (t.label==="direct" ? "Loaded (direct)" : "Loaded (via proxy)");
+        fetchMsg.className="success small";
+        updateKpis();
+        return;
+      }catch(e){ lastError = e; }
+    }
+    // If here, all failed
+    fetchMsg.textContent = "❌ Could not fetch hiscores — check internet or Safari privacy settings.";
+    fetchMsg.className="error small";
+    console.error("Hiscore fetch failed:", lastError);
+    // keep old hiscores and lastUpdated
     updateKpis();
   }
-  function parseHiscores(text){ const lines=text.trim().split("
-"); const stats={}; lines.forEach((line,i)=>{ const p=line.split(","); const level=Number(p[1]||0); const xp=Number(p[2]||0); stats[i]={level,xp}; }); state.hiscores=stats; }
+
+  function parseHiscores(text){
+    const lines=text.trim().split("\n");
+    const stats={};
+    lines.forEach((line,i)=>{
+      const p=line.split(",");
+      const level=Number(p[1]||0);
+      const xp=Number(p[2]||0);
+      stats[i]={level,xp};
+    });
+    state.hiscores=stats;
+  }
+
   function hydrate(){ rsnEl.value=state.rsn||"D 3VI L"; skillSel.value=state.skillIdx||SKILLS[0].idx; targetSel.value=state.targetLevel||99; xpPerHourEl.value=state.xpPerHour||""; startDateEl.value=state.startDate||""; }
-  function populate(){ populateSkills(); populateLevels(); }
+
+  // Init
+  function populate(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); populateLevels(); }
+  function populateLevels(){ let opts=""; for(let L=1; L<=126; L++){ opts+=`<option value="${L}" ${L===99?'selected':''}>${L}</option>`; } targetSel.innerHTML=opts; }
   populate();
+
   [skillSel, targetSel, xpPerHourEl, startDateEl].forEach(el=> el.addEventListener("input", ()=> updateKpis() ));
-  fetchBtn.addEventListener("click", ()=>{ state.rsn=rsnEl.value.trim(); if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; return; } fetchHiscores(state.rsn); });
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4"); if(saved) state=JSON.parse(saved); }catch{}
+  fetchBtn.addEventListener("click", ()=>{ state.rsn=rsnEl.value.trim(); if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; } fetchHiscores(state.rsn); });
+
+  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1"); if(saved) state=JSON.parse(saved); }catch{}
   hydrate(); mountWeeks(); updateKpis();
-  if(state.rsn) fetchHiscores(state.rsn);
-})();</script>
+  if(state.rsn){ fetchHiscores(state.rsn); }
+})();
+</script>
+
 <script>
-if('serviceWorker' in navigator){ window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
+// PWA service worker registration
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
