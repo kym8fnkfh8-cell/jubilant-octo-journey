@@ -3,47 +3,69 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4.1d</title>
+<title>OSRS Skilling Planner — v4.3</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b0d12" />
 <style>
   :root { --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45; --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d; --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac; }
   *{ box-sizing:border-box; }
-  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
+  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; overflow-x:hidden;}
   body::before{ content:""; position:fixed; inset:0; pointer-events:none; opacity:.08;
     background: radial-gradient(600px 300px at 20% 10%, #8ab4f8 0, transparent 60%),
                 radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
                 radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
     filter: blur(40px); }
-  .wrap{ max-width:1000px; margin:18px auto 80px; padding:0 14px; }
-  header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; }
+  a{ color:var(--accent-2); }
+  .wrap{ max-width:1040px; margin:18px auto 80px; padding:0 14px; }
+  header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; flex-wrap:wrap;}
   .brand{ display:flex;align-items:center;gap:10px; }
   h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
   .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));border:1px solid var(--edge); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
   .grid{ display:grid;grid-template-columns:repeat(12,1fr);gap:12px; }
   .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
   label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
-  input[type="number"],input[type="date"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
+  input[type="number"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
   .row{ display:flex;gap:12px;align-items:center;flex-wrap:wrap }
-  .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700 }
+  .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700; white-space:nowrap; }
   .btn:hover{ filter:brightness(1.05) } .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
   .pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a2f45;background:#111522;font-size:12px;color:var(--muted) }
   .kpi{ display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:#0e1220;border:1px solid #23283a }
   .kpi .big{ font-weight:800;font-size:22px;color:var(--gold-2) }
   .progress{ height:12px;border-radius:999px;border:1px solid #2a2f45;background:#0d111b;overflow:hidden }
   .progress>div{ height:100%;width:0%;background:linear-gradient(90deg,#24c8a8,#5fb3ff) }
-  .week{ display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:8px }
-  @media (max-width:740px){ .grid{grid-template-columns:repeat(6,1fr)} .span-3,.span-4,.span-6,.span-8{grid-column:span 6} .week{grid-template-columns:repeat(2,1fr)} }
-  .day{ background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:12px }
+
+  /* Responsive week layout */
+  .week-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
+  .week{ display:grid; gap:12px; grid-auto-rows:1fr; grid-template-columns: repeat( auto-fill, minmax(150px, 1fr) ); }
+  @media (min-width:1000px){ .week{ grid-template-columns: repeat(7, minmax(140px, 1fr)); } }
+
+  .day{ background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:10px }
   .day h4{ margin:0 0 6px;font-size:13px;color:#c2c9d6;letter-spacing:.2px;display:flex;align-items:center;gap:6px }
-  .hr-row{ display:flex;align-items:center;gap:8px } .hr{ width:90px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
-  .muted{ color:var(--muted) } .error{ color:var(--danger) } .success{ color:var(--good) } .small{ font-size:12px } .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  input[type="range"]{ width:100%;margin:6px 0;-webkit-appearance:none;background:transparent }
+  input[type="range"]::-webkit-slider-runnable-track{ height:10px;border-radius:999px;background:#2b3146 }
+  input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none;width:24px;height:24px;border-radius:50%;margin-top:-7px;background:#8ab4f8;border:2px solid #0f1424 }
+  .hr-row{ display:flex;align-items:center;gap:8px; flex-wrap:nowrap }
+  .hr{ width:80px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
+
+  /* Skill picker */
+  .skill-picker { position:relative; }
+  .skill-btn { width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #2a2f45; border-radius:9px; background:#0c1019; color:var(--text); cursor:pointer; }
+  .skill-btn img{ width:22px; height:22px; border-radius:4px; }
+  .skill-panel { position:absolute; z-index:50; left:0; right:0; margin-top:6px; background:#0f1320; border:1px solid #23283a; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.4); display:none; max-height:320px; overflow:auto; padding:8px; }
+  .skill-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  @media (min-width:720px){ .skill-grid{ grid-template-columns:repeat(4, 1fr);} }
+  @media (min-width:980px){ .skill-grid{ grid-template-columns:repeat(6, 1fr);} }
+  .skill-item { display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #23283a; border-radius:8px; background:#0e1220; cursor:pointer; }
+  .skill-item:hover{ background:#10162a; }
+  .skill-item img{ width:22px; height:22px; border-radius:4px; }
+
+  .footer { text-align:center; font-size:12px; color:#98a1b3; margin:30px 0 10px; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.1d</span></div>
+      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.3</span></div>
       <div class="row">
         <button id="saveBtn" class="btn outline">Save</button>
         <button id="loadBtn" class="btn outline">Load</button>
@@ -56,12 +78,8 @@
     </header>
 
     <div class="card grid">
-      <div class="span-4">
-        <label for="rsn">RuneScape Name</label>
-        <input id="rsn" type="text" placeholder="Your RSN" value="D 3VI L" />
-      </div>
-      <div class="span-4">
-        <label for="mode">Hiscore type</label>
+      <div class="span-4"><label for="rsn">RuneScape Name</label><input id="rsn" type="text" placeholder="Your RSN" value="D 3VI L" /></div>
+      <div class="span-4"><label for="mode">Hiscore type</label>
         <select id="mode">
           <option value="hiscore_oldschool">Normal (OSRS)</option>
           <option value="hiscore_oldschool_ironman">Ironman</option>
@@ -73,7 +91,6 @@
         <label>&nbsp;</label>
         <div class="row">
           <button id="fetchBtn" class="btn">Fetch Hiscores</button>
-          <button id="peekBtn" class="btn outline">Peek data</button>
           <span id="fetchMsg" class="muted small"></span>
         </div>
       </div>
@@ -81,7 +98,17 @@
       <div class="span-12 card" style="border-color:#4a3b1a">
         <div class="pill">🎯 Goal setup</div>
         <div class="grid" style="margin-top:10px;gap:12px;grid-template-columns:repeat(12,1fr)">
-          <div class="span-4"><label for="skill">Skill</label><select id="skill"></select></div>
+          <div class="span-4">
+            <label>Skill</label>
+            <div class="skill-picker" id="skillPicker">
+              <button class="skill-btn" type="button" id="skillBtn">
+                <img id="skillIcon" src="assets/skills/fishing.png" alt="">
+                <span id="skillLabel">Fishing</span>
+              </button>
+              <div class="skill-panel" id="skillPanel"></div>
+            </div>
+            <select id="skill" style="display:none"></select>
+          </div>
           <div class="span-4"><label for="targetLevel">Target level</label><select id="targetLevel"></select></div>
           <div class="span-4"><label for="xpPerHour">XP per hour</label><input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" /></div>
           <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div></div>
@@ -90,7 +117,6 @@
           <div class="span-3"><label>XP to goal</label><div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted small">tgt - current</span></div></div>
           <div class="span-12" style="margin-top:6px;"><div class="progress"><div id="progressFill"></div></div></div>
           <div class="span-12 small muted" id="lastUpdatedRow" style="display:none;">Last hiscores sync: <span id="lastUpdated"></span></div>
-          <div class="span-12 small mono muted" id="debugPeek" style="display:none;"></div>
         </div>
       </div>
 
@@ -103,84 +129,83 @@
     </div>
 
     <div id="weeks"></div>
+
+    <footer class="footer">
+      Old School RuneScape assets © Jagex Ltd. Used under Jagex’s
+      <a href="https://www.jagex.com/en-GB/terms/fan-content-policy" target="_blank" rel="noopener noreferrer">Fan Content Policy</a>.
+      This is a free, non-commercial fan tool.
+    </footer>
   </div>
 
 <script>
-// --- Corrected XP table: xp[L] = XP required to reach level L (L=1..126), with xp[1]=0 ---
+// --- Correct XP table (from 4.1d) ---
 const XP_TABLE = (() => {
-  const xp = Array(127).fill(0); // 0..126; we'll use 1..126
-  let points = 0;
-  xp[1] = 0;
-  for (let L = 2; L <= 126; L++) {
-    const i = L - 1;
-    points += Math.floor(i + 300 * Math.pow(2, i / 7));
-    xp[L] = Math.floor(points / 4);
-  }
+  const xp = Array(127).fill(0); let points = 0; xp[1] = 0;
+  for (let L = 2; L <= 126; L++) { const i = L - 1; points += Math.floor(i + 300 * Math.pow(2, i / 7)); xp[L] = Math.floor(points / 4); }
   return xp;
 })();
 
 const SKILLS = [
-  { name: "Attack", idx: 1 },{ name: "Defence", idx: 2 },{ name: "Strength", idx: 3 },{ name: "Hitpoints", idx: 4 },
-  { name: "Ranged", idx: 5 },{ name: "Prayer", idx: 6 },{ name: "Magic", idx: 7 },{ name: "Cooking", idx: 8 },
-  { name: "Woodcutting", idx: 9 },{ name: "Fletching", idx: 10 },{ name: "Fishing", idx: 11 },{ name: "Firemaking", idx: 12 },
-  { name: "Crafting", idx: 13 },{ name: "Smithing", idx: 14 },{ name: "Mining", idx: 15 },{ name: "Herblore", idx: 16 },
-  { name: "Agility", idx: 17 },{ name: "Thieving", idx: 18 },{ name: "Slayer", idx: 19 },{ name: "Farming", idx: 20 },
-  { name: "Runecraft", idx: 21 },{ name: "Hunter", idx: 22 },{ name: "Construction", idx: 23 },
+  { key:"attack", name:"Attack", idx: 1 },{ key:"defence", name:"Defence", idx: 2 },{ key:"strength", name:"Strength", idx: 3 },{ key:"hitpoints", name:"Hitpoints", idx: 4 },
+  { key:"ranged", name:"Ranged", idx: 5 },{ key:"prayer", name:"Prayer", idx: 6 },{ key:"magic", name:"Magic", idx: 7 },{ key:"cooking", name:"Cooking", idx: 8 },
+  { key:"woodcutting", name:"Woodcutting", idx: 9 },{ key:"fletching", name:"Fletching", idx: 10 },{ key:"fishing", name:"Fishing", idx: 11 },{ key:"firemaking", name:"Firemaking", idx: 12 },
+  { key:"crafting", name:"Crafting", idx: 13 },{ key:"smithing", name:"Smithing", idx: 14 },{ key:"mining", name:"Mining", idx: 15 },{ key:"herblore", name:"Herblore", idx: 16 },
+  { key:"agility", name:"Agility", idx: 17 },{ key:"thieving", name:"Thieving", idx: 18 },{ key:"slayer", name:"Slayer", idx: 19 },{ key:"farming", name:"Farming", idx: 20 },
+  { key:"runecraft", name:"Runecraft", idx: 21 },{ key:"hunter", name:"Hunter", idx: 22 },{ key:"construction", name:"Construction", idx: 23 },
 ];
 
 (function(){
   const byId=(id)=>document.getElementById(id);
-  const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg"), peekBtn=byId("peekBtn");
-  const skillSel=byId("skill"), targetSel=byId("targetLevel");
-  const curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
+  const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg");
+  const skillHidden=byId("skill"), skillBtn=byId("skillBtn"), skillPanel=byId("skillPanel"), skillIcon=byId("skillIcon"), skillLabel=byId("skillLabel");
+  const targetSel=byId("targetLevel"), curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
   const hoursNeededEl=byId("hoursNeeded"), hoursAllocatedEl=byId("hoursAllocated"), hoursRemainingEl=byId("hoursRemaining"), etaEl=byId("eta");
-  const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated"), debugPeek=byId("debugPeek");
+  const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated");
   const xpPerHourEl=byId("xpPerHour");
 
   const MAX_HOURS_PER_DAY=24;
-  let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:SKILLS[0].idx, targetLevel:99, xpPerHour:90000, startDate:"",
-    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)], lastCSV:null };
+  let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:11, skillKey:"fishing", targetLevel:91, xpPerHour:90000, startDate:"",
+    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
 
-  function populateSkills(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); }
-  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===99?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
+  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===state.targetLevel?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
   function ceil2(n){ return Math.ceil(n*100)/100 } function formatNum(n){ return (n||0).toLocaleString() }
   function formatHours(h){ if(!isFinite(h)||h<0) return "0"; const f=h-Math.floor(h); return f===0?String(Math.floor(h)):h.toFixed(2) }
   function sumAllocated(){ return ceil2(state.weeks.flat().reduce((a,b)=>a+(Number(b)||0),0)) }
   function computeNeededHours(xpRemaining){ const rate=Math.max(1, Number(xpPerHourEl.value||state.xpPerHour)||1); state.xpPerHour=rate; return xpRemaining<=0?0:ceil2(xpRemaining/rate) }
-  function estimateFinishDate(hoursNeeded){ if(!state.startDate) return ""; const start=new Date(state.startDate+"T00:00:00"); let remaining=hoursNeeded;
-    for(let w=0; w<state.weeks.length; w++){ for(let d=0; d<7; d++){ remaining-=Number(state.weeks[w][d])||0; if(remaining<=0){ const done=new Date(start); done.setDate(done.getDate()+w*7+d); return done.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) } } } return "" }
 
   function updateKpis(){
-    const skillIdx=Number(skillSel.value), targetLevel=Number(targetSel.value); state.skillIdx=skillIdx; state.targetLevel=targetLevel;
-    const cur=(state.hiscores&&state.hiscores[skillIdx])?state.hiscores[skillIdx]:{level:1, xp:0};
+    const cur=(state.hiscores&&state.hiscores[state.skillIdx])?state.hiscores[state.skillIdx]:{level:1, xp:0};
     curLevelEl.textContent=cur.level||1; curXpEl.textContent=formatNum(cur.xp||0);
-
-    // Correct target XP using new XP table
+    const targetLevel=Number(targetSel.value||state.targetLevel||1); state.targetLevel=targetLevel;
     const tgtXp=XP_TABLE[targetLevel]||0; tgtXpEl.textContent=formatNum(tgtXp);
-
-    // UX rule: if target level <= current level, XP to goal = 0 (user is already at/above that level).
-    let xpRemaining = Math.max(0, tgtXp - (cur.xp||0));
-    if ((cur.level||1) >= targetLevel) xpRemaining = 0;
-
+    let xpRemaining=Math.max(0, tgtXp-(cur.xp||0)); if((cur.level||1)>=targetLevel) xpRemaining=0;
     xpRemEl.textContent=formatNum(xpRemaining);
     const hoursNeeded=computeNeededHours(xpRemaining); hoursNeededEl.textContent=formatHours(hoursNeeded);
     const allocated=sumAllocated(); hoursAllocatedEl.textContent=formatHours(allocated);
     const remainingH=Math.max(0, ceil2(hoursNeeded-allocated)); hoursRemainingEl.textContent=formatHours(remainingH);
     const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
-    const eta=estimateFinishDate(hoursNeeded); etaEl.textContent=eta||"—";
+    const eta=""; etaEl.textContent=eta||"—";
     if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
-    try{ localStorage.setItem("osrs_skilling_plan_v4_1d", JSON.stringify(state)); }catch{}
+    try{ localStorage.setItem("osrs_skilling_plan_v4_3", JSON.stringify(state)); }catch{}
   }
 
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
-    return `<div class="card" data-week="${index}"><div class="row" style="justify-content:space-between; margin-bottom:8px;"><div class="pill">Week ${index+1}</div>
-      <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
-      <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div></div>
-      <div class="week">${
+    return `<div class="card" data-week="${index}">
+      <div class="row" style="justify-content:space-between; margin-bottom:8px;">
+        <div class="pill">Week ${index+1}</div>
+        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
+        <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div>
+      </div>
+      <div class="week-wrap"><div class="week">${
         ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`
-          <div class="day"><h4>${d}</h4><input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
-            <div class="hr-row"><span class="muted">Hours</span><input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" /></div></div>`).join('')
-      }</div></div>`;
+          <div class="day"><h4>${d}</h4>
+            <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
+            <div class="hr-row"><span class="muted">Hours</span>
+              <input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" />
+            </div>
+          </div>`).join('')
+      }</div></div>
+    </div>`;
   }
   function mountWeeks(){ weeksEl.innerHTML=state.weeks.map((_,i)=>weekTemplate(i)).join(""); weeksEl.querySelectorAll('input[data-autoclear="1"]').forEach(attachAutoClear); }
   function ensureOneWeek(){ if(!state.weeks.length) state.weeks.push(Array(7).fill(0)); }
@@ -197,16 +222,36 @@ const SKILLS = [
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
   document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); });
-  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1d", JSON.stringify(state)); alert("Saved!"); });
-  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1d"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_3", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_3"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
   document.getElementById("resetBtn").addEventListener("click", ()=>{ if(!confirm("Reset everything?")) return; state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); });
-  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1d.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
-  document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importInput").click());
-  document.getElementById("importInput").addEventListener("change", (e)=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); hydrate(); mountWeeks(); updateKpis(); }catch{ alert("Invalid JSON"); } }; r.readAsText(f); });
 
-  function hydrate(){ rsnEl.value=state.rsn||"D 3VI L"; modeEl.value=state.mode||"hiscore_oldschool"; skillSel.value=state.skillIdx||SKILLS[0].idx; targetSel.value=state.targetLevel||99; xpPerHourEl.value=state.xpPerHour||""; }
+  function hydrate(){
+    // build skill UI
+    const panel=document.getElementById("skillPanel"); const grid=document.createElement("div"); grid.className="skill-grid";
+    SKILLS.forEach(s=>{
+      const item=document.createElement("div"); item.className="skill-item"; item.setAttribute("data-idx", s.idx);
+      item.innerHTML=`<img src="assets/skills/${s.key}.png" alt=""><span>${s.name}</span>`;
+      item.addEventListener("click", ()=>{ setSkill(s); panel.style.display='none'; });
+      grid.appendChild(item);
+    });
+    panel.appendChild(grid);
+    document.getElementById("skillBtn").addEventListener("click", ()=>{
+      panel.style.display = (panel.style.display==='block') ? 'none' : 'block';
+    });
+    window.addEventListener("click", (e)=>{ if(!document.getElementById("skillPicker").contains(e.target)) panel.style.display='none'; });
 
-  // Fetch + peek
+    // hidden select for logic compatibility
+    const hidden=byId("skill"); hidden.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join("");
+
+    populateLevels();
+    setSkill(SKILLS.find(s=>s.idx===state.skillIdx)||SKILLS[10]);
+    xpPerHourEl.value=state.xpPerHour||"";
+  }
+
+  function setSkill(s){ state.skillIdx=s.idx; state.skillKey=s.key; byId("skillIcon").src=`assets/skills/${s.key}.png`; byId("skillLabel").textContent=s.name; byId("skill").value=s.idx; updateKpis(); }
+
+  // --- Hiscore fetch (from 4.1d) ---
   async function fetchHiscores(name, mode){
     const encoded=encodeURIComponent(name);
     const base = `https://secure.runescape.com/m=${mode}/index_lite.ws?player=${encoded}`;
@@ -218,28 +263,31 @@ const SKILLS = [
     fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
     let text=null;
     for(const t of tries){
-      try{ const res=await fetch(t.url); if(!res.ok) throw new Error("HTTP "+res.status); text=await res.text();
+      try{
+        const res=await fetch(t.url);
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        text=await res.text();
         if(!/^-?\d+,-?\d+,-?\d+(\n|$)/.test(text)) throw new Error("Unexpected format");
-        state.lastCSV=text; parseHiscores(text); state.lastUpdated=Date.now();
+        parseHiscores(text); state.lastUpdated=Date.now();
         fetchMsg.textContent=(t.label==="direct"?"Loaded (direct)":"Loaded (via proxy)"); fetchMsg.className="success small"; updateKpis(); return;
       }catch(e){ /* try next */ }
     }
     fetchMsg.textContent="❌ Could not fetch hiscores — check internet or Safari privacy settings."; fetchMsg.className="error small";
-    if(text){ debugPeek.style.display="block"; debugPeek.textContent=(text.trim().split("\n").slice(0,20).join("\n")); }
     updateKpis();
   }
-
   function parseHiscores(text){
     const lines=text.trim().split("\n"); const stats={};
     for(let i=0;i<lines.length;i++){ const p=lines[i].split(",").map(x=>Number(x)); if(p.length>=3){ stats[i]={rank:p[0], level:Math.max(0,p[1]), xp:Math.max(0,p[2])}; } }
     state.hiscores=stats;
   }
 
-  populateSkills(); populateLevels();
-  [skillSel, targetSel, xpPerHourEl].forEach(el=> el.addEventListener("input", ()=> updateKpis() ));
-  fetchBtn.addEventListener("click", ()=>{ state.rsn=rsnEl.value.trim(); state.mode=modeEl.value; if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; } fetchHiscores(state.rsn, state.mode); });
+  document.getElementById("fetchBtn").addEventListener("click", ()=>{
+    state.rsn=rsnEl.value.trim(); state.mode=modeEl.value; if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; }
+    fetchHiscores(state.rsn, state.mode);
+  });
 
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1d"); if(saved) state=JSON.parse(saved); }catch{}
+  // Init
+  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_3"); if(saved) state=JSON.parse(saved); }catch{}
   hydrate(); mountWeeks(); updateKpis();
 })();
 </script>
