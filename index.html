@@ -3,40 +3,28 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4.1</title>
+<title>OSRS Skilling Planner — v4.1a</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b0d12" />
 <style>
-  :root {
-    --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45;
-    --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d;
-    --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac;
-  }
+  :root { --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45; --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d; --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac; }
   *{ box-sizing:border-box; }
-  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);
-    font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
-  /* Subtle runes background */
-  body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; opacity:.08;
-    background:
-      radial-gradient(600px 300px at 20% 10%, #8ab4f8 0, transparent 60%),
-      radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
-      radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
-    filter: blur(40px);
-  }
+  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; opacity:.08;
+    background: radial-gradient(600px 300px at 20% 10%, #8ab4f8 0, transparent 60%),
+                radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
+                radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
+    filter: blur(40px); }
   a{ color:var(--accent-2); }
   .wrap{ max-width:1000px; margin:18px auto 80px; padding:0 14px; }
   header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; }
   .brand{ display:flex;align-items:center;gap:10px; }
-  h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);
-    text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
-  .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));
-    border:1px solid var(--edge); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
+  h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
+  .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));border:1px solid var(--edge); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
   .grid{ display:grid;grid-template-columns:repeat(12,1fr);gap:12px; }
   .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
   label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
-  input[type="number"],input[type="date"],input[type="text"],select{
-    width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
+  input[type="number"],input[type="date"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
   input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input[type="number"]{ -moz-appearance:textfield }
   input[type="range"]{ width:100%;margin:8px 6px;-webkit-appearance:none;background:transparent }
@@ -60,19 +48,13 @@
   .hr-row{ display:flex;align-items:center;gap:8px }
   .hr{ width:90px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
   .badge{ font-size:12px;padding:6px 8px;background:#10131a;border:1px solid #2a2f45;border-radius:8px }
-  .muted{ color:var(--muted) }
-  .error{ color:var(--danger) }
-  .success{ color:var(--good) }
-  .small{ font-size:12px }
+  .muted{ color:var(--muted) } .error{ color:var(--danger) } .success{ color:var(--good) } .small{ font-size:12px }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="brand">
-        <h1>OSRS Skilling Planner</h1>
-        <span class="pill">v4.1</span>
-      </div>
+      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.1a</span></div>
       <div class="row">
         <button id="saveBtn" class="btn outline">Save</button>
         <button id="loadBtn" class="btn outline">Load</button>
@@ -105,42 +87,15 @@
       <div class="span-12 card" style="border-color:#4a3b1a">
         <div class="pill">🎯 Goal setup</div>
         <div class="grid" style="margin-top:10px;gap:12px;grid-template-columns:repeat(12,1fr)">
-          <div class="span-4">
-            <label for="skill">Skill</label>
-            <select id="skill"></select>
-          </div>
-          <div class="span-4">
-            <label for="targetLevel">Target level</label>
-            <select id="targetLevel"></select>
-          </div>
-          <div class="span-4">
-            <label for="xpPerHour">XP per hour</label>
-            <input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" />
-          </div>
-
-          <div class="span-3">
-            <label>Current level</label>
-            <div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div>
-          </div>
-          <div class="span-3">
-            <label>Current XP</label>
-            <div class="kpi"><span class="big" id="curXp">—</span><span class="muted small">from hiscores</span></div>
-          </div>
-          <div class="span-3">
-            <label>Target XP</label>
-            <div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted small">calc from level</span></div>
-          </div>
-          <div class="span-3">
-            <label>XP to goal</label>
-            <div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted small">tgt - current</span></div>
-          </div>
-
-          <div class="span-12" style="margin-top:6px;">
-            <div class="progress"><div id="progressFill"></div></div>
-          </div>
-          <div class="span-12 small muted" id="lastUpdatedRow" style="display:none;">
-            Last hiscores sync: <span id="lastUpdated"></span>
-          </div>
+          <div class="span-4"><label for="skill">Skill</label><select id="skill"></select></div>
+          <div class="span-4"><label for="targetLevel">Target level</label><select id="targetLevel"></select></div>
+          <div class="span-4"><label for="xpPerHour">XP per hour</label><input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" /></div>
+          <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div></div>
+          <div class="span-3"><label>Current XP</label><div class="kpi"><span class="big" id="curXp">—</span><span class="muted small">from hiscores</span></div></div>
+          <div class="span-3"><label>Target XP</label><div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted small">calc from level</span></div></div>
+          <div class="span-3"><label>XP to goal</label><div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted small">tgt - current</span></div></div>
+          <div class="span-12" style="margin-top:6px;"><div class="progress"><div id="progressFill"></div></div></div>
+          <div class="span-12 small muted" id="lastUpdatedRow" style="display:none;">Last hiscores sync: <span id="lastUpdated"></span></div>
         </div>
       </div>
 
@@ -161,9 +116,7 @@
   </div>
 
 <script>
-// XP table (levels 1..126)
 const XP_TABLE = (() => { const arr=[0]; let points=0; for (let lvl=1; lvl<=126; lvl++){ points += Math.floor(lvl + 300 * Math.pow(2, lvl/7)); arr[lvl] = Math.floor(points/4); } return arr; })();
-// Skills (hiscore indexes)
 const SKILLS = [
   { name: "Attack", idx: 1 },{ name: "Defence", idx: 2 },{ name: "Strength", idx: 3 },{ name: "Hitpoints", idx: 4 },
   { name: "Ranged", idx: 5 },{ name: "Prayer", idx: 6 },{ name: "Magic", idx: 7 },{ name: "Cooking", idx: 8 },
@@ -204,7 +157,7 @@ const SKILLS = [
     const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
     const eta=estimateFinishDate(hoursNeeded); etaEl.textContent=eta||"—";
     if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
-    try{ localStorage.setItem("osrs_skilling_plan_v4_1", JSON.stringify(state)); }catch{}
+    try{ localStorage.setItem("osrs_skilling_plan_v4_1a", JSON.stringify(state)); }catch{}
   }
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
     return `<div class="card" data-week="${index}">
@@ -245,14 +198,14 @@ const SKILLS = [
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
   document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); });
-  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1", JSON.stringify(state)); alert("Saved!"); });
-  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1a", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1a"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
   document.getElementById("resetBtn").addEventListener("click", ()=>{ if(!confirm("Reset everything?")) return; state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); });
-  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
+  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1a.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
   document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importInput").click());
   document.getElementById("importInput").addEventListener("change", (e)=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); hydrate(); mountWeeks(); updateKpis(); }catch{ alert("Invalid JSON"); } }; r.readAsText(f); });
 
-  // Robust hiscore fetch with two CORS-friendly proxies and direct mode
+  // Robust hiscore fetch with two CORS-friendly proxies and direct mode (FIXED spread operator)
   async function fetchHiscores(name){
     const encoded=encodeURIComponent(name);
     const direct = `https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=${encoded}`;
@@ -260,10 +213,9 @@ const SKILLS = [
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(direct)}`,
       `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`
     ];
-    const tries = [ {url: direct, label: "direct"}, *proxies.map(p=>({url:p, label:"proxy"})) ];
+    const tries = [{url: direct, label: "direct"}, ...proxies.map(p=>({url:p, label:"proxy"}))];
 
-    fetchMsg.textContent="Fetching…";
-    fetchMsg.className="muted small";
+    fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
     let lastError=null, text=null;
     for (const t of tries){
       try{
@@ -279,49 +231,29 @@ const SKILLS = [
         return;
       }catch(e){ lastError = e; }
     }
-    // If here, all failed
     fetchMsg.textContent = "❌ Could not fetch hiscores — check internet or Safari privacy settings.";
     fetchMsg.className="error small";
     console.error("Hiscore fetch failed:", lastError);
-    // keep old hiscores and lastUpdated
     updateKpis();
   }
 
   function parseHiscores(text){
-    const lines=text.trim().split("\n");
-    const stats={};
-    lines.forEach((line,i)=>{
-      const p=line.split(",");
-      const level=Number(p[1]||0);
-      const xp=Number(p[2]||0);
-      stats[i]={level,xp};
-    });
+    const lines=text.trim().split("\n"); const stats={};
+    lines.forEach((line,i)=>{ const p=line.split(","); const level=Number(p[1]||0); const xp=Number(p[2]||0); stats[i]={level,xp}; });
     state.hiscores=stats;
   }
 
   function hydrate(){ rsnEl.value=state.rsn||"D 3VI L"; skillSel.value=state.skillIdx||SKILLS[0].idx; targetSel.value=state.targetLevel||99; xpPerHourEl.value=state.xpPerHour||""; startDateEl.value=state.startDate||""; }
 
-  // Init
-  function populate(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); populateLevels(); }
-  function populateLevels(){ let opts=""; for(let L=1; L<=126; L++){ opts+=`<option value="${L}" ${L===99?'selected':''}>${L}</option>`; } targetSel.innerHTML=opts; }
-  populate();
-
+  populateSkills(); populateLevels();
   [skillSel, targetSel, xpPerHourEl, startDateEl].forEach(el=> el.addEventListener("input", ()=> updateKpis() ));
   fetchBtn.addEventListener("click", ()=>{ state.rsn=rsnEl.value.trim(); if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; } fetchHiscores(state.rsn); });
 
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1"); if(saved) state=JSON.parse(saved); }catch{}
-  hydrate(); mountWeeks(); updateKpis();
-  if(state.rsn){ fetchHiscores(state.rsn); }
-})();
-</script>
-
+  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1a"); if(saved) state=JSON.parse(saved); }catch{}
+  hydrate(); mountWeeks(); updateKpis(); if(state.rsn){ fetchHiscores(state.rsn); }
+})();</script>
 <script>
-// PWA service worker registration
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-  });
-}
+if('serviceWorker' in navigator){ window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
 </script>
 </body>
 </html>
