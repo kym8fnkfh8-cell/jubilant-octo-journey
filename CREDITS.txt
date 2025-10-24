@@ -1,6 +1,1 @@
-Old School RuneScape © Jagex Ltd.
-
-All icons and related assets are property of Jagex Ltd and are used in accordance with the Jagex Fan Content Policy:
-https://www.jagex.com/en-GB/terms/fan-content-policy
-
-This project (OSRS Skilling Planner) is a free, non-commercial fan tool and is not affiliated with or endorsed by Jagex Ltd.
+Old School RuneScape © Jagex Ltd. Used under Jagex’s Fan Content Policy. This is a free, non-commercial fan tool. https://www.jagex.com/en-GB/terms/fan-content-policy
