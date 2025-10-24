@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4.1b</title>
+<title>OSRS Skilling Planner — v4.1d</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b0d12" />
 <style>
@@ -15,7 +15,6 @@
                 radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
                 radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
     filter: blur(40px); }
-  a{ color:var(--accent-2); }
   .wrap{ max-width:1000px; margin:18px auto 80px; padding:0 14px; }
   header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; }
   .brand{ display:flex;align-items:center;gap:10px; }
@@ -25,13 +24,9 @@
   .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
   label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
   input[type="number"],input[type="date"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
-  input[type="range"]{ width:100%;margin:8px 6px;-webkit-appearance:none;background:transparent }
-  input[type="range"]::-webkit-slider-runnable-track{ height:10px;border-radius:999px;background:#2b3146 }
-  input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none;width:26px;height:26px;border-radius:50%;margin-top:-8px;background:#8ab4f8;border:2px solid #0f1424 }
   .row{ display:flex;gap:12px;align-items:center;flex-wrap:wrap }
   .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700 }
-  .btn:hover{ filter:brightness(1.05) }
-  .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
+  .btn:hover{ filter:brightness(1.05) } .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
   .pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a2f45;background:#111522;font-size:12px;color:var(--muted) }
   .kpi{ display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:#0e1220;border:1px solid #23283a }
   .kpi .big{ font-weight:800;font-size:22px;color:var(--gold-2) }
@@ -42,15 +37,13 @@
   .day{ background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:12px }
   .day h4{ margin:0 0 6px;font-size:13px;color:#c2c9d6;letter-spacing:.2px;display:flex;align-items:center;gap:6px }
   .hr-row{ display:flex;align-items:center;gap:8px } .hr{ width:90px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
-  .badge{ font-size:12px;padding:6px 8px;background:#10131a;border:1px solid #2a2f45;border-radius:8px }
-  .muted{ color:var(--muted) } .error{ color:var(--danger) } .success{ color:var(--good) } .small{ font-size:12px }
-  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .muted{ color:var(--muted) } .error{ color:var(--danger) } .success{ color:var(--good) } .small{ font-size:12px } .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.1b</span></div>
+      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.1d</span></div>
       <div class="row">
         <button id="saveBtn" class="btn outline">Save</button>
         <button id="loadBtn" class="btn outline">Load</button>
@@ -80,9 +73,9 @@
         <label>&nbsp;</label>
         <div class="row">
           <button id="fetchBtn" class="btn">Fetch Hiscores</button>
+          <button id="peekBtn" class="btn outline">Peek data</button>
           <span id="fetchMsg" class="muted small"></span>
         </div>
-        <div class="small muted" style="margin-top:6px;">Needs internet; if blocked, check Safari privacy settings.</div>
       </div>
 
       <div class="span-12 card" style="border-color:#4a3b1a">
@@ -113,7 +106,19 @@
   </div>
 
 <script>
-const XP_TABLE = (() => { const arr=[0]; let points=0; for (let lvl=1; lvl<=126; lvl++){ points += Math.floor(lvl + 300 * Math.pow(2, lvl/7)); arr[lvl] = Math.floor(points/4); } return arr; })();
+// --- Corrected XP table: xp[L] = XP required to reach level L (L=1..126), with xp[1]=0 ---
+const XP_TABLE = (() => {
+  const xp = Array(127).fill(0); // 0..126; we'll use 1..126
+  let points = 0;
+  xp[1] = 0;
+  for (let L = 2; L <= 126; L++) {
+    const i = L - 1;
+    points += Math.floor(i + 300 * Math.pow(2, i / 7));
+    xp[L] = Math.floor(points / 4);
+  }
+  return xp;
+})();
+
 const SKILLS = [
   { name: "Attack", idx: 1 },{ name: "Defence", idx: 2 },{ name: "Strength", idx: 3 },{ name: "Hitpoints", idx: 4 },
   { name: "Ranged", idx: 5 },{ name: "Prayer", idx: 6 },{ name: "Magic", idx: 7 },{ name: "Cooking", idx: 8 },
@@ -125,15 +130,16 @@ const SKILLS = [
 
 (function(){
   const byId=(id)=>document.getElementById(id);
-  const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg");
-  const skillSel=byId("skill"), targetSel=byId("targetLevel"), xpPerHourEl=byId("xpPerHour");
-  const startDateEl=byId("startDate"), curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
+  const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg"), peekBtn=byId("peekBtn");
+  const skillSel=byId("skill"), targetSel=byId("targetLevel");
+  const curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
   const hoursNeededEl=byId("hoursNeeded"), hoursAllocatedEl=byId("hoursAllocated"), hoursRemainingEl=byId("hoursRemaining"), etaEl=byId("eta");
   const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated"), debugPeek=byId("debugPeek");
+  const xpPerHourEl=byId("xpPerHour");
 
   const MAX_HOURS_PER_DAY=24;
   let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:SKILLS[0].idx, targetLevel:99, xpPerHour:90000, startDate:"",
-    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
+    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)], lastCSV:null };
 
   function populateSkills(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); }
   function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===99?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
@@ -143,42 +149,44 @@ const SKILLS = [
   function computeNeededHours(xpRemaining){ const rate=Math.max(1, Number(xpPerHourEl.value||state.xpPerHour)||1); state.xpPerHour=rate; return xpRemaining<=0?0:ceil2(xpRemaining/rate) }
   function estimateFinishDate(hoursNeeded){ if(!state.startDate) return ""; const start=new Date(state.startDate+"T00:00:00"); let remaining=hoursNeeded;
     for(let w=0; w<state.weeks.length; w++){ for(let d=0; d<7; d++){ remaining-=Number(state.weeks[w][d])||0; if(remaining<=0){ const done=new Date(start); done.setDate(done.getDate()+w*7+d); return done.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) } } } return "" }
+
   function updateKpis(){
     const skillIdx=Number(skillSel.value), targetLevel=Number(targetSel.value); state.skillIdx=skillIdx; state.targetLevel=targetLevel;
-    const cur=(state.hiscores&&state.hiscores[skillIdx])?state.hiscores[skillIdx]:{level:1, xp:0}; curLevelEl.textContent=cur.level||1; curXpEl.textContent=formatNum(cur.xp);
+    const cur=(state.hiscores&&state.hiscores[skillIdx])?state.hiscores[skillIdx]:{level:1, xp:0};
+    curLevelEl.textContent=cur.level||1; curXpEl.textContent=formatNum(cur.xp||0);
+
+    // Correct target XP using new XP table
     const tgtXp=XP_TABLE[targetLevel]||0; tgtXpEl.textContent=formatNum(tgtXp);
-    const xpRemaining=Math.max(0, tgtXp-(cur.xp||0)); xpRemEl.textContent=formatNum(xpRemaining);
+
+    // UX rule: if target level <= current level, XP to goal = 0 (user is already at/above that level).
+    let xpRemaining = Math.max(0, tgtXp - (cur.xp||0));
+    if ((cur.level||1) >= targetLevel) xpRemaining = 0;
+
+    xpRemEl.textContent=formatNum(xpRemaining);
     const hoursNeeded=computeNeededHours(xpRemaining); hoursNeededEl.textContent=formatHours(hoursNeeded);
     const allocated=sumAllocated(); hoursAllocatedEl.textContent=formatHours(allocated);
     const remainingH=Math.max(0, ceil2(hoursNeeded-allocated)); hoursRemainingEl.textContent=formatHours(remainingH);
     const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
     const eta=estimateFinishDate(hoursNeeded); etaEl.textContent=eta||"—";
     if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
-    try{ localStorage.setItem("osrs_skilling_plan_v4_1b", JSON.stringify(state)); }catch{}
+    try{ localStorage.setItem("osrs_skilling_plan_v4_1d", JSON.stringify(state)); }catch{}
   }
+
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
-    return `<div class="card" data-week="${index}">
-      <div class="row" style="justify-content:space-between; margin-bottom:8px;">
-        <div class="pill">Week ${index+1}</div>
-        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
-        <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div>
-      </div>
+    return `<div class="card" data-week="${index}"><div class="row" style="justify-content:space-between; margin-bottom:8px;"><div class="pill">Week ${index+1}</div>
+      <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
+      <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div></div>
       <div class="week">${
         ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`
-          <div class="day">
-            <h4>${d}</h4>
-            <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
-            <div class="hr-row"><span class="muted">Hours</span>
-              <input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" />
-            </div>
-          </div>`).join('')
-      }</div>
-    </div>`;
+          <div class="day"><h4>${d}</h4><input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
+            <div class="hr-row"><span class="muted">Hours</span><input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" /></div></div>`).join('')
+      }</div></div>`;
   }
   function mountWeeks(){ weeksEl.innerHTML=state.weeks.map((_,i)=>weekTemplate(i)).join(""); weeksEl.querySelectorAll('input[data-autoclear="1"]').forEach(attachAutoClear); }
   function ensureOneWeek(){ if(!state.weeks.length) state.weeks.push(Array(7).fill(0)); }
   function attachAutoClear(el){ if(!el) return; el.addEventListener("focus", ()=>{ if(el.dataset.cleared!=="1") el.select(); });
-    el.addEventListener("pointerdown", ()=>{ if(el.dataset.cleared!=="1") setTimeout(()=>{ try{ el.select(); }catch{} },0); }); el.addEventListener("input", ()=>{ if(el.dataset.cleared!=="1") el.dataset.cleared="1"; }); }
+    el.addEventListener("pointerdown", ()=>{ if(el.dataset.cleared!=="1") setTimeout(()=>{ try{ el.select(); }catch{} },0); });
+    el.addEventListener("input", ()=>{ if(el.dataset.cleared!=="1") el.dataset.cleared="1"; }); }
   weeksEl.addEventListener("input",(e)=>{ const card=e.target.closest("[data-week]"); if(!card) return; const w=Number(card.getAttribute("data-week"));
     const day=Number(e.target.getAttribute("data-day")); if(!Number.isInteger(w)||!Number.isInteger(day)) return;
     const val=Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value)||0)); state.weeks[w][day]=val;
@@ -189,16 +197,16 @@ const SKILLS = [
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
   document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); });
-  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1b", JSON.stringify(state)); alert("Saved!"); });
-  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1b"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1d", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1d"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
   document.getElementById("resetBtn").addEventListener("click", ()=>{ if(!confirm("Reset everything?")) return; state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); });
-  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1b.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
+  document.getElementById("exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="osrs_skilling_plan_v4_1d.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },0); });
   document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importInput").click());
   document.getElementById("importInput").addEventListener("change", (e)=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); hydrate(); mountWeeks(); updateKpis(); }catch{ alert("Invalid JSON"); } }; r.readAsText(f); });
 
   function hydrate(){ rsnEl.value=state.rsn||"D 3VI L"; modeEl.value=state.mode||"hiscore_oldschool"; skillSel.value=state.skillIdx||SKILLS[0].idx; targetSel.value=state.targetLevel||99; xpPerHourEl.value=state.xpPerHour||""; }
 
-  // Hiscore fetch with type + validation + debug peek
+  // Fetch + peek
   async function fetchHiscores(name, mode){
     const encoded=encodeURIComponent(name);
     const base = `https://secure.runescape.com/m=${mode}/index_lite.ws?player=${encoded}`;
@@ -207,40 +215,32 @@ const SKILLS = [
       `https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`
     ];
     const tries = [{url: base, label: "direct"}, ...proxies.map(u=>({url:u, label:"proxy"}))];
-
     fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
-    let lastError=null, text=null;
+    let text=null;
     for(const t of tries){
-      try{
-        const res=await fetch(t.url); if(!res.ok) throw new Error("HTTP "+res.status);
-        text=await res.text();
-        if(!/^-?\d+,-?\d+,-?\d+(\n|$)/.test(text)){ throw new Error("Unexpected format"); }
-        debugPeek.style.display="none"; debugPeek.textContent="";
-        parseHiscores(text);
-        state.lastUpdated=Date.now();
-        fetchMsg.textContent = (t.label==="direct" ? "Loaded (direct)" : "Loaded (via proxy)"); fetchMsg.className="success small";
-        updateKpis(); return;
-      }catch(e){ lastError = e; }
+      try{ const res=await fetch(t.url); if(!res.ok) throw new Error("HTTP "+res.status); text=await res.text();
+        if(!/^-?\d+,-?\d+,-?\d+(\n|$)/.test(text)) throw new Error("Unexpected format");
+        state.lastCSV=text; parseHiscores(text); state.lastUpdated=Date.now();
+        fetchMsg.textContent=(t.label==="direct"?"Loaded (direct)":"Loaded (via proxy)"); fetchMsg.className="success small"; updateKpis(); return;
+      }catch(e){ /* try next */ }
     }
-    fetchMsg.textContent = "❌ Could not fetch hiscores — check internet or Safari privacy settings."; fetchMsg.className="error small";
-    if(text){ const first = text.trim().split("\n").slice(0,2).join("\n"); debugPeek.style.display="block"; debugPeek.textContent = "Debug preview:\\n"+first; }
-    console.error(lastError); updateKpis();
+    fetchMsg.textContent="❌ Could not fetch hiscores — check internet or Safari privacy settings."; fetchMsg.className="error small";
+    if(text){ debugPeek.style.display="block"; debugPeek.textContent=(text.trim().split("\n").slice(0,20).join("\n")); }
+    updateKpis();
   }
 
   function parseHiscores(text){
     const lines=text.trim().split("\n"); const stats={};
-    lines.forEach((line,i)=>{ const p=line.split(",").map(x=>Number(x)); if(p.length>=3){ stats[i] = { rank:p[0], level:p[1], xp:p[2] }; }});
-    state.hiscores = stats;
+    for(let i=0;i<lines.length;i++){ const p=lines[i].split(",").map(x=>Number(x)); if(p.length>=3){ stats[i]={rank:p[0], level:Math.max(0,p[1]), xp:Math.max(0,p[2])}; } }
+    state.hiscores=stats;
   }
 
-  // Init
   populateSkills(); populateLevels();
   [skillSel, targetSel, xpPerHourEl].forEach(el=> el.addEventListener("input", ()=> updateKpis() ));
   fetchBtn.addEventListener("click", ()=>{ state.rsn=rsnEl.value.trim(); state.mode=modeEl.value; if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; } fetchHiscores(state.rsn, state.mode); });
 
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1b"); if(saved) state=JSON.parse(saved); }catch{}
+  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_1d"); if(saved) state=JSON.parse(saved); }catch{}
   hydrate(); mountWeeks(); updateKpis();
-  if(state.rsn){ fetchHiscores(state.rsn, state.mode); }
 })();
 </script>
 
