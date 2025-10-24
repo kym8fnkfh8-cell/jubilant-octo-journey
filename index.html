@@ -146,7 +146,7 @@
       </div>
     </div>
 
-    <div id="weeks"></"></div>
+    <div id="weeks"></div>
 
     <footer class="footer">
       Old School RuneScape assets © Jagex Ltd. Used under Jagex’s
@@ -156,6 +156,7 @@
   </div>
 
 <script>
+// XP table
 const XP_TABLE = (() => {
   const xp = Array(127).fill(0); let points = 0; xp[1] = 0;
   for (let L = 2; L <= 126; L++) { const i = L - 1; points += Math.floor(i + 300 * Math.pow(2, i / 7)); xp[L] = Math.floor(points / 4); }
@@ -171,6 +172,7 @@ const SKILLS = [
   { key:"runecraft", name:"Runecraft", idx: 21 },{ key:"hunter", name:"Hunter", idx: 22 },{ key:"construction", name:"Construction", idx: 23 },
 ];
 
+// Wiki fallback mapping for authentic icons (optional; local files override)
 const WIKI_ICON = {
   attack:"Attack_icon.png", defence:"Defence_icon.png", strength:"Strength_icon.png",
   hitpoints:"Hitpoints_icon.png", ranged:"Ranged_icon.png", prayer:"Prayer_icon.png",
@@ -196,7 +198,7 @@ const WIKI_ICON = {
   let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:11, skillKey:"fishing", targetLevel:91, xpPerHour:90000, startDate:"",
     hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
 
-  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===state.targetLevel?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
+  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="\${L}" \${L===state.targetLevel?'selected':''}>\${L}</option>`);} targetSel.innerHTML=opts.join(""); }
   function ceil2(n){ return Math.ceil(n*100)/100 } function formatNum(n){ return (n||0).toLocaleString() }
   function formatHours(h){ if(!isFinite(h)||h<0) return "0"; const f=h-Math.floor(h); return f===0?String(Math.floor(h)):h.toFixed(2) }
   function sumAllocated(){ return ceil2(state.weeks.flat().reduce((a,b)=>a+(Number(b)||0),0)) }
@@ -219,18 +221,18 @@ const WIKI_ICON = {
   }
 
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
-    return `<div class="card" data-week="${index}">
+    return `<div class="card" data-week="\${index}">
       <div class="row" style="justify-content:space-between; margin-bottom:8px;">
-        <div class="pill">Week ${index+1}</div>
-        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
+        <div class="pill">Week \${index+1}</div>
+        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">\${formatHours(total)}</span> h</div>
         <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div>
       </div>
       <div class="week-wrap"><div class="week">${
         ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`
-          <div class="day"><h4>${d}</h4>
-            <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
+          <div class="day"><h4>\${d}</h4>
+            <input type="range" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" />
             <div class="hr-row"><span class="muted">Hours</span>
-              <input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" />
+              <input class="hr" type="number" inputmode="decimal" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" data-autoclear="1" />
             </div>
           </div>`).join('')
       }</div></div>
@@ -244,19 +246,19 @@ const WIKI_ICON = {
   weeksEl.addEventListener("input",(e)=>{ const card=e.target.closest("[data-week]"); if(!card) return; const w=Number(card.getAttribute("data-week"));
     const day=Number(e.target.getAttribute("data-day")); if(!Number.isInteger(w)||!Number.isInteger(day)) return;
     const val=Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value)||0)); state.weeks[w][day]=val;
-    const siblings=card.querySelectorAll(`[data-day="${day}"]`); siblings.forEach(inp=>{ if(inp!==e.target) inp.value=val; }); updateKpis(); });
+    const siblings=card.querySelectorAll(`[data-day="\${day}"]`); siblings.forEach(inp=>{ if(inp!==e.target) inp.value=val; }); updateKpis(); });
   weeksEl.addEventListener("click",(e)=>{ const btn=e.target.closest("button[data-act]"); if(!btn) return; const card=e.target.closest("[data-week]"); const w=Number(card.getAttribute("data-week"));
     const act=btn.getAttribute("data-act"); if(act==="dup"){ state.weeks.push([...(state.weeks[w]||Array(7).fill(0))]); }
     if(act==="clear"){ state.weeks[w]=Array(7).fill(0); }
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
-  function setSkill(s){ state.skillIdx=s.idx; state.skillKey=s.key; const local=`assets/skills/${s.key}.png`; const wiki=`https://oldschool.runescape.wiki/images/${encodeURIComponent(WIKI_ICON[s.key])}`; skillIcon.src=local; skillIcon.onerror=()=>{ skillIcon.onerror=null; skillIcon.src=wiki; }; skillLabel.textContent=s.name; byId("skill").value=s.idx; updateKpis(); }
+  function setSkill(s){ state.skillIdx=s.idx; state.skillKey=s.key; const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`; skillIcon.src=local; skillIcon.onerror=()=>{ skillIcon.onerror=null; skillIcon.src=wiki; }; skillLabel.textContent=s.name; byId("skill").value=s.idx; updateKpis(); }
   function buildSkillPanel(){
     const panel=document.getElementById("skillPanel"); const grid=document.createElement("div"); grid.className="skill-grid";
     SKILLS.forEach(s=>{
       const item=document.createElement("div"); item.className="skill-item"; item.setAttribute("data-idx", s.idx);
       const img=document.createElement("img");
-      const local=`assets/skills/${s.key}.png`; const wiki=`https://oldschool.runescape.wiki/images/${encodeURIComponent(WIKI_ICON[s.key])}`;
+      const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`;
       img.src=local; img.alt=s.name; img.onerror=()=>{ img.onerror=null; img.src=wiki; };
       const span=document.createElement("span"); span.textContent=s.name;
       item.appendChild(img); item.appendChild(span);
@@ -266,15 +268,15 @@ const WIKI_ICON = {
     panel.appendChild(grid);
     document.getElementById("skillBtn").addEventListener("click", ()=>{ panel.style.display = (panel.style.display==='block') ? 'none' : 'block'; });
     window.addEventListener("click", (e)=>{ if(!document.getElementById("skillPicker").contains(e.target)) panel.style.display='none'; });
-    const hidden=byId("skill"); hidden.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join("");
+    const hidden=byId("skill"); hidden.innerHTML=SKILLS.map(s=>`<option value="\${s.idx}">\${s.name}</option>`).join("");
   }
 
   async function fetchHiscores(name, mode){
     const encoded=encodeURIComponent(name);
-    const base = `https://secure.runescape.com/m=${mode}/index_lite.ws?player=${encoded}`;
+    const base = \`https://secure.runescape.com/m=\${mode}/index_lite.ws?player=\${encoded}\`;
     const proxies = [
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(base)}`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`
+      \`https://api.codetabs.com/v1/proxy?quest=\${encodeURIComponent(base)}\`,
+      \`https://api.allorigins.win/raw?url=\${encodeURIComponent(base)}\`
     ];
     const tries = [{url: base, label: "direct"}, ...proxies.map(u=>({url:u, label:"proxy"}))];
     fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
@@ -284,8 +286,7 @@ const WIKI_ICON = {
         const res=await fetch(t.url);
         if(!res.ok) throw new Error("HTTP "+res.status);
         text=await res.text();
-        if(!/^-?\d+,-?\d+,-?\d+(
-|$)/.test(text)) throw new Error("Unexpected format");
+        if(!/^-?\d+,-?\d+,-?\d+(\n|$)/.test(text)) throw new Error("Unexpected format");
         parseHiscores(text); state.lastUpdated=Date.now();
         fetchMsg.textContent=(t.label==="direct"?"Loaded (direct)":"Loaded (via proxy)"); fetchMsg.className="success small"; updateKpis(); return;
       }catch(e){ /* try next */ }
@@ -294,8 +295,7 @@ const WIKI_ICON = {
     updateKpis();
   }
   function parseHiscores(text){
-    const lines=text.trim().split("
-"); const stats={};
+    const lines=text.trim().split("\n"); const stats={};
     for(let i=0;i<lines.length;i++){ const p=lines[i].split(",").map(x=>Number(x)); if(p.length>=3){ stats[i]={rank:p[0], level:Math.max(0,p[1]), xp:Math.max(0,p[2])}; } }
     state.hiscores=stats;
   }
@@ -305,16 +305,36 @@ const WIKI_ICON = {
     fetchHiscores(state.rsn, state.mode);
   });
 
+  // Init
   try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_3a"); if(saved) state=JSON.parse(saved); }catch{}
-  populateLevels(); buildSkillPanel(); setSkill(SKILLS[10]);
+  populateLevels(); buildSkillPanel(); setSkill(SKILLS[10]); // Fishing default
   mountWeeks(); updateKpis();
-  // Hide splash
-  const rootEl = document.getElementById('appRoot'); rootEl.style.visibility='visible'; setTimeout(()=>{ document.getElementById('splash').classList.add('fade-out'); setTimeout(()=>{ const s=document.getElementById('splash'); s && s.remove(); }, 500); }, 450);
 })();
 </script>
 
+<!-- Bulletproof splash removal -->
 <script>
-if('serviceWorker' in navigator){ window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
+(function(){
+  function hideSplash(){
+    const root = document.getElementById('appRoot');
+    if (root) root.style.visibility = 'visible';
+    const s = document.getElementById('splash');
+    if (s) { s.classList.add('fade-out'); setTimeout(()=> s && s.remove(), 600); }
+  }
+  document.addEventListener('DOMContentLoaded', hideSplash, {once:true});
+  window.addEventListener('load', hideSplash, {once:true});
+  window.addEventListener('error', hideSplash, {once:true});
+  setTimeout(hideSplash, 1800);
+})();
+</script>
+
+<!-- Service worker: allow bypass with ?no-sw=1 -->
+<script>
+if ('serviceWorker' in navigator && !location.search.includes('no-sw=1')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
