@@ -1,5 +1,5 @@
-// service-worker.js  — OSRS Planner v4-3f
-const CACHE_NAME = 'osrs-planner-v4-3f';
+// service-worker.js — OSRS Planner v4-3g
+const CACHE_NAME = 'osrs-planner-v4-3g';
 const ASSETS = [
   './',
   './index.html',
@@ -32,12 +32,8 @@ self.addEventListener('fetch', (e) => {
         res ||
         fetch(req)
           .then(net => {
-            if (
-              req.method === 'GET' &&
-              new URL(req.url).origin === location.origin
-            ) {
-              const clone = net.clone();
-              caches.open(CACHE_NAME).then(c => c.put(req, clone));
+            if (req.method === 'GET' && new URL(req.url).origin === location.origin) {
+              caches.open(CACHE_NAME).then(c => c.put(req, net.clone()));
             }
             return net;
           })
