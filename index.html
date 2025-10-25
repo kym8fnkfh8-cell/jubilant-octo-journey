@@ -268,8 +268,9 @@ function updateKpis(){
   const tgtXp = XP[state.targetLevel]||0;
   tgtXpEl.textContent = (tgtXp||0).toLocaleString();
 
-  let xpRemaining = Math.max(0, tgtXp - (cur.xp||0));
-  if ((cur.level||1) >= state.targetLevel) xpRemaining = 0;
+// Always compute to the exact XP threshold for the chosen level.
+// Do NOT force to zero if currentLevel >= targetLevel; show the shortfall if any.
+let xpRemaining = Math.max(0, (XP[state.targetLevel] || 0) - (cur.xp || 0));
   xpRemEl.textContent = xpRemaining.toLocaleString();
 
   const hoursNeeded = xpRemaining<=0 ? 0 : ceil2(xpRemaining / Math.max(1,state.xpPerHour));
