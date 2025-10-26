@@ -265,16 +265,14 @@ function updateKpis(){
   state.targetLevel = +targetSel.value || state.targetLevel;
   state.xpPerHour   = +xpPerHourEl.value || state.xpPerHour;
 
-  const tgtXp = XP[state.targetLevel]||0;
-  tgtXpEl.textContent = (tgtXp||0).toLocaleString();
+// Target level & target XP (one definition)
+const tgtLevel = Number(targetSel.value || state.targetLevel || 1);
+const tgtXp    = XP[tgtLevel] || 0;
+tgtXpEl.textContent = tgtXp.toLocaleString();
 
-// Always compute to the exact XP threshold for the chosen level.
-// Do NOT force to zero if currentLevel >= targetLevel; show the shortfall if any.
 // ----- XP to goal (friendly + exact) -----
 const curLevel = cur.level || 1;
 const curXp    = cur.xp || 0;
-const tgtLevel = Number(targetSel.value || state.targetLevel || 1);
-const tgtXp    = XP[tgtLevel] || 0;
 
 // shortfall to the *exact* threshold of the chosen level
 const shortfall = Math.max(0, tgtXp - curXp);
