@@ -270,8 +270,34 @@ function updateKpis(){
 
 // Always compute to the exact XP threshold for the chosen level.
 // Do NOT force to zero if currentLevel >= targetLevel; show the shortfall if any.
-let xpRemaining = Math.max(0, (XP[state.targetLevel] || 0) - (cur.xp || 0));
-  xpRemEl.textContent = xpRemaining.toLocaleString();
+// ----- XP to goal (friendly + exact) -----
+const curLevel = cur.level || 1;
+const curXp    = cur.xp || 0;
+const tgtLevel = Number(targetSel.value || state.targetLevel || 1);
+const tgtXp    = XP[tgtLevel] || 0;
+
+// shortfall to the *exact* threshold of the chosen level
+const shortfall = Math.max(0, tgtXp - curXp);
+
+// Friendly rule:
+// if you've selected a level you already have (or lower), show 0,
+// but still surface the shortfall in a small note.
+let xpRemaining = (tgtLevel <= curLevel) ? 0 : shortfall;
+xpRemEl.textContent = xpRemaining.toLocaleString();
+
+// Optional note: show true XP gap if you're below threshold of that level
+let note = document.getElementById('thresholdNote');
+if (!note) {
+  note = document.createElement('div');
+  note.id = 'thresholdNote';
+  note.style.fontSize = '12px';
+  note.style.color = '#9aa3b2';
+  note.style.marginTop = '4px';
+  xpRemEl.parentElement.parentElement.appendChild(note);
+}
+note.textContent = (tgtLevel <= curLevel && shortfall > 0)
+  ? `Below level threshold by ${shortfall.toLocaleString()} XP (exact).`
+  : '';
 
   const hoursNeeded = xpRemaining<=0 ? 0 : ceil2(xpRemaining / Math.max(1,state.xpPerHour));
   const allocated   = sumAllocated();
