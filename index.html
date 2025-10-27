@@ -3,16 +3,18 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4.3a</title>
+<title>OSRS Skilling Planner — v4.1e</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="favicon.png" sizes="any">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#0b0d12" />
 <style>
   :root { --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45; --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d; --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac; }
   *{ box-sizing:border-box; }
-  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; overflow-x:hidden;}
-  a{ color:var(--accent-2); }
+  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; overflow-x:hidden;}
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; opacity:.08;
+    background: radial-gradient(600px 300px at 20% 10%, #8ab4f8 0, transparent 60%),
+                radial-gradient(500px 260px at 90% 20%, #24c8a8 0, transparent 60%),
+                radial-gradient(600px 320px at 40% 90%, #e6c36a 0, transparent 60%);
+    filter: blur(40px); }
   .wrap{ max-width:1040px; margin:18px auto 80px; padding:0 14px; }
   header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; flex-wrap:wrap;}
   .brand{ display:flex;align-items:center;gap:10px; }
@@ -21,7 +23,7 @@
   .grid{ display:grid;grid-template-columns:repeat(12,1fr);gap:12px; }
   .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
   label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
-  input[type="number"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
+  input[type="number"],input[type="date"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
   .row{ display:flex;gap:12px;align-items:center;flex-wrap:wrap }
   .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700; white-space:nowrap; }
   .btn:hover{ filter:brightness(1.05) } .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
@@ -30,60 +32,35 @@
   .kpi .big{ font-weight:800;font-size:22px;color:var(--gold-2) }
   .progress{ height:12px;border-radius:999px;border:1px solid #2a2f45;background:#0d111b;overflow:hidden }
   .progress>div{ height:100%;width:0%;background:linear-gradient(90deg,#24c8a8,#5fb3ff) }
+
+  /* --- Responsive week layout fixes --- */
   .week-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
-  .week{ display:grid; gap:12px; grid-auto-rows:1fr; grid-template-columns: repeat( auto-fill, minmax(150px, 1fr) ); }
-  @media (min-width:1000px){ .week{ grid-template-columns: repeat(7, minmax(140px, 1fr)); } }
+  .week{ display:grid; gap:12px; grid-auto-rows:1fr;
+         grid-template-columns: repeat( auto-fill, minmax(150px, 1fr) ); }
+  /* If there’s plenty of space, show up to seven evenly */
+  @media (min-width:1000px){
+    .week{ grid-template-columns: repeat(7, minmax(140px, 1fr)); }
+  }
+
   .day{ background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:10px }
   .day h4{ margin:0 0 6px;font-size:13px;color:#c2c9d6;letter-spacing:.2px;display:flex;align-items:center;gap:6px }
   input[type="range"]{ width:100%;margin:6px 0;-webkit-appearance:none;background:transparent }
   input[type="range"]::-webkit-slider-runnable-track{ height:10px;border-radius:999px;background:#2b3146 }
   input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none;width:24px;height:24px;border-radius:50%;margin-top:-7px;background:#8ab4f8;border:2px solid #0f1424 }
+  input[type="range"]::-moz-range-track{ height:10px;border-radius:999px;background:#2b3146 }
+  input[type="range"]::-moz-range-thumb{ width:24px;height:24px;border-radius:50%;background:#8ab4f8;border:2px solid #0f1424 }
   .hr-row{ display:flex;align-items:center;gap:8px; flex-wrap:nowrap }
   .hr{ width:80px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
-  .footer { text-align:center; font-size:12px; color:#98a1b3; margin:30px 0 10px; }
-
-  .skill-picker { position:relative; }
-  .skill-btn { width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #2a2f45; border-radius:9px; background:#0c1019; color:var(--text); cursor:pointer; }
-  .skill-btn img{ width:22px; height:22px; border-radius:4px; }
-  .skill-panel { position:absolute; z-index:50; left:0; width:min(620px,96vw); margin-top:6px; background:#0f1320; border:1px solid #23283a; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.4); display:none; max-height:70vh; overflow-y:auto; overflow-x:hidden; padding:12px; }
-  .skill-grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-  @media (max-width:520px){ .skill-grid{ grid-template-columns:1fr; } }
-  .skill-item { display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #23283a; border-radius:8px; background:#0e1220; cursor:pointer; }
-  .skill-item:hover{ background:#10162a; }
-  .skill-item img{ width:22px; height:22px; border-radius:4px; }
-
-  #splash {
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(800px 400px at 20% 10%, rgba(138,180,248,.08), transparent 60%),
-                radial-gradient(700px 340px at 90% 20%, rgba(36,200,168,.08), transparent 60%),
-                radial-gradient(800px 420px at 40% 90%, rgba(230,195,106,.10), transparent 60%),
-                #0b0d12;
-    z-index:999;
-  }
-  .splash-card{
-    display:flex; flex-direction:column; align-items:center; gap:14px;
-    padding:26px 28px; background:#0f1320; border:1px solid #23283a; border-radius:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
-  }
-  .splash-card img{ width:96px; height:96px; border-radius:20px; }
-  .splash-title{ font-weight:800; color:var(--gold-2); }
-  .splash-sub{ color:#9aa3b2; font-size:13px; }
-  .fade-out{ animation:fadeout .45s ease forwards; }
-  @keyframes fadeout{ to{ opacity:0; transform:translateY(6px); } }
+  .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .toolbar .right{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{ font-size:12px;padding:6px 8px;background:#10131a;border:1px solid #2a2f45;border-radius:8px }
+  .muted{ color:var(--muted) } .error{ color:var(--danger) } .success{ color:var(--good) } .small{ font-size:12px } .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 </style>
 </head>
 <body>
-  <div id="splash" aria-hidden="true">
-    <div class="splash-card">
-      <img src="animated-icon.gif" alt="loading">
-      <div class="splash-title">OSRS Skilling Planner</div>
-      <div class="splash-sub">Loading saved data & hiscores…</div>
-    </div>
-  </div>
-
-  <div class="wrap" style="visibility:hidden" id="appRoot">
+  <div class="wrap">
     <header>
-      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.3a</span></div>
+      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.1e</span></div>
       <div class="row">
         <button id="saveBtn" class="btn outline">Save</button>
         <button id="loadBtn" class="btn outline">Load</button>
@@ -116,17 +93,7 @@
       <div class="span-12 card" style="border-color:#4a3b1a">
         <div class="pill">🎯 Goal setup</div>
         <div class="grid" style="margin-top:10px;gap:12px;grid-template-columns:repeat(12,1fr)">
-          <div class="span-4">
-            <label>Skill</label>
-            <div class="skill-picker" id="skillPicker">
-              <button class="skill-btn" type="button" id="skillBtn">
-                <img id="skillIcon" src="assets/skills/fishing.png" alt="">
-                <span id="skillLabel">Fishing</span>
-              </button>
-              <div class="skill-panel" id="skillPanel"></div>
-            </div>
-            <select id="skill" style="display:none"></select>
-          </div>
+          <div class="span-4"><label for="skill">Skill</label><select id="skill"></select></div>
           <div class="span-4"><label for="targetLevel">Target level</label><select id="targetLevel"></select></div>
           <div class="span-4"><label for="xpPerHour">XP per hour</label><input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" /></div>
           <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div></div>
@@ -147,92 +114,86 @@
     </div>
 
     <div id="weeks"></div>
-
-    <footer class="footer">
-      Old School RuneScape assets © Jagex Ltd. Used under Jagex’s
-      <a href="https://www.jagex.com/en-GB/terms/fan-content-policy" target="_blank" rel="noopener noreferrer">Fan Content Policy</a>.
-      This is a free, non-commercial fan tool.
-    </footer>
   </div>
 
 <script>
-// XP table
+// XP table as in 4.1d
 const XP_TABLE = (() => {
-  const xp = Array(127).fill(0); let points = 0; xp[1] = 0;
-  for (let L = 2; L <= 126; L++) { const i = L - 1; points += Math.floor(i + 300 * Math.pow(2, i / 7)); xp[L] = Math.floor(points / 4); }
+  const xp = Array(127).fill(0);
+  let points = 0;
+  xp[1] = 0;
+  for (let L = 2; L <= 126; L++) {
+    const i = L - 1;
+    points += Math.floor(i + 300 * Math.pow(2, i / 7));
+    xp[L] = Math.floor(points / 4);
+  }
   return xp;
 })();
 
 const SKILLS = [
-  { key:"attack", name:"Attack", idx: 1 },{ key:"defence", name:"Defence", idx: 2 },{ key:"strength", name:"Strength", idx: 3 },{ key:"hitpoints", name:"Hitpoints", idx: 4 },
-  { key:"ranged", name:"Ranged", idx: 5 },{ key:"prayer", name:"Prayer", idx: 6 },{ key:"magic", name:"Magic", idx: 7 },{ key:"cooking", name:"Cooking", idx: 8 },
-  { key:"woodcutting", name:"Woodcutting", idx: 9 },{ key:"fletching", name:"Fletching", idx: 10 },{ key:"fishing", name:"Fishing", idx: 11 },{ key:"firemaking", name:"Firemaking", idx: 12 },
-  { key:"crafting", name:"Crafting", idx: 13 },{ key:"smithing", name:"Smithing", idx: 14 },{ key:"mining", name:"Mining", idx: 15 },{ key:"herblore", name:"Herblore", idx: 16 },
-  { key:"agility", name:"Agility", idx: 17 },{ key:"thieving", name:"Thieving", idx: 18 },{ key:"slayer", name:"Slayer", idx: 19 },{ key:"farming", name:"Farming", idx: 20 },
-  { key:"runecraft", name:"Runecraft", idx: 21 },{ key:"hunter", name:"Hunter", idx: 22 },{ key:"construction", name:"Construction", idx: 23 },
+  { name: "Attack", idx: 1 },{ name: "Defence", idx: 2 },{ name: "Strength", idx: 3 },{ name: "Hitpoints", idx: 4 },
+  { name: "Ranged", idx: 5 },{ name: "Prayer", idx: 6 },{ name: "Magic", idx: 7 },{ name: "Cooking", idx: 8 },
+  { name: "Woodcutting", idx: 9 },{ name: "Fletching", idx: 10 },{ name: "Fishing", idx: 11 },{ name: "Firemaking", idx: 12 },
+  { name: "Crafting", idx: 13 },{ name: "Smithing", idx: 14 },{ name: "Mining", idx: 15 },{ name: "Herblore", idx: 16 },
+  { name: "Agility", idx: 17 },{ name: "Thieving", idx: 18 },{ name: "Slayer", idx: 19 },{ name: "Farming", idx: 20 },
+  { name: "Runecraft", idx: 21 },{ name: "Hunter", idx: 22 },{ name: "Construction", idx: 23 },
 ];
-
-// Wiki fallback mapping for authentic icons (optional; local files override)
-const WIKI_ICON = {
-  attack:"Attack_icon.png", defence:"Defence_icon.png", strength:"Strength_icon.png",
-  hitpoints:"Hitpoints_icon.png", ranged:"Ranged_icon.png", prayer:"Prayer_icon.png",
-  magic:"Magic_icon.png", cooking:"Cooking_icon.png", woodcutting:"Woodcutting_icon.png",
-  fletching:"Fletching_icon.png", fishing:"Fishing_icon.png", firemaking:"Firemaking_icon.png",
-  crafting:"Crafting_icon.png", smithing:"Smithing_icon.png", mining:"Mining_icon.png",
-  herblore:"Herblore_icon.png", agility:"Agility_icon.png", thieving:"Thieving_icon.png",
-  slayer:"Slayer_icon.png", farming:"Farming_icon.png", runecraft:"Runecraft_icon.png",
-  hunter:"Hunter_icon.png", construction:"Construction_icon.png",
-};
 
 (function(){
   const byId=(id)=>document.getElementById(id);
-  const root = byId("appRoot"); const splash = byId("splash");
   const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg");
-  const skillHidden=byId("skill"), skillBtn=byId("skillBtn"), skillPanel=byId("skillPanel"), skillIcon=byId("skillIcon"), skillLabel=byId("skillLabel");
-  const targetSel=byId("targetLevel"), curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
+  const skillSel=byId("skill"), targetSel=byId("targetLevel");
+  const curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
   const hoursNeededEl=byId("hoursNeeded"), hoursAllocatedEl=byId("hoursAllocated"), hoursRemainingEl=byId("hoursRemaining"), etaEl=byId("eta");
   const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated");
   const xpPerHourEl=byId("xpPerHour");
 
   const MAX_HOURS_PER_DAY=24;
-  let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:11, skillKey:"fishing", targetLevel:91, xpPerHour:90000, startDate:"",
+  let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:SKILLS[0].idx, targetLevel:99, xpPerHour:90000, startDate:"",
     hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
 
-  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="\${L}" \${L===state.targetLevel?'selected':''}>\${L}</option>`);} targetSel.innerHTML=opts.join(""); }
+  function populateSkills(){ skillSel.innerHTML=SKILLS.map(s=>`<option value="${s.idx}">${s.name}</option>`).join(""); }
+  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="${L}" ${L===99?'selected':''}>${L}</option>`);} targetSel.innerHTML=opts.join(""); }
   function ceil2(n){ return Math.ceil(n*100)/100 } function formatNum(n){ return (n||0).toLocaleString() }
   function formatHours(h){ if(!isFinite(h)||h<0) return "0"; const f=h-Math.floor(h); return f===0?String(Math.floor(h)):h.toFixed(2) }
   function sumAllocated(){ return ceil2(state.weeks.flat().reduce((a,b)=>a+(Number(b)||0),0)) }
   function computeNeededHours(xpRemaining){ const rate=Math.max(1, Number(xpPerHourEl.value||state.xpPerHour)||1); state.xpPerHour=rate; return xpRemaining<=0?0:ceil2(xpRemaining/rate) }
+  function estimateFinishDate(hoursNeeded){ return ""; } // unchanged for brevity
 
   function updateKpis(){
-    const cur=(state.hiscores&&state.hiscores[state.skillIdx])?state.hiscores[state.skillIdx]:{level:1, xp:0};
+    const skillIdx=Number(skillSel.value), targetLevel=Number(targetSel.value); state.skillIdx=skillIdx; state.targetLevel=targetLevel;
+    const cur=(state.hiscores&&state.hiscores[skillIdx])?state.hiscores[skillIdx]:{level:1, xp:0};
     curLevelEl.textContent=cur.level||1; curXpEl.textContent=formatNum(cur.xp||0);
-    const targetLevel=Number(targetSel.value||state.targetLevel||1); state.targetLevel=targetLevel;
     const tgtXp=XP_TABLE[targetLevel]||0; tgtXpEl.textContent=formatNum(tgtXp);
-    let xpRemaining=Math.max(0, tgtXp-(cur.xp||0)); if((cur.level||1)>=targetLevel) xpRemaining=0;
+    let xpRemaining = Math.max(0, tgtXp - (cur.xp||0));
+    if ((cur.level||1) >= targetLevel) xpRemaining = 0;
     xpRemEl.textContent=formatNum(xpRemaining);
     const hoursNeeded=computeNeededHours(xpRemaining); hoursNeededEl.textContent=formatHours(hoursNeeded);
     const allocated=sumAllocated(); hoursAllocatedEl.textContent=formatHours(allocated);
     const remainingH=Math.max(0, ceil2(hoursNeeded-allocated)); hoursRemainingEl.textContent=formatHours(remainingH);
     const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
-    etaEl.textContent="—";
+    const eta=estimateFinishDate(hoursNeeded); etaEl.textContent=eta||"—";
     if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
-    try{ localStorage.setItem("osrs_skilling_plan_v4_3a", JSON.stringify(state)); }catch{}
+    try{ localStorage.setItem("osrs_skilling_plan_v4_1e", JSON.stringify(state)); }catch{}
   }
 
   function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
-    return `<div class="card" data-week="\${index}">
-      <div class="row" style="justify-content:space-between; margin-bottom:8px;">
-        <div class="pill">Week \${index+1}</div>
-        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">\${formatHours(total)}</span> h</div>
-        <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div>
+    return `<div class="card" data-week="${index}">
+      <div class="toolbar"><div class="pill">Week ${index+1}</div>
+        <div class="right">
+          <div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">${formatHours(total)}</span> h</div>
+          <button class="btn outline" data-act="dup">Duplicate</button>
+          <button class="btn outline" data-act="clear">Clear</button>
+          <button class="btn outline" data-act="del">Delete</button>
+        </div>
       </div>
       <div class="week-wrap"><div class="week">${
         ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`
-          <div class="day"><h4>\${d}</h4>
-            <input type="range" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" />
+          <div class="day">
+            <h4>${d}</h4>
+            <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" />
             <div class="hr-row"><span class="muted">Hours</span>
-              <input class="hr" type="number" inputmode="decimal" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" data-autoclear="1" />
+              <input class="hr" type="number" inputmode="decimal" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${state.weeks[index][i]||0}" data-day="${i}" data-autoclear="1" />
             </div>
           </div>`).join('')
       }</div></div>
@@ -246,95 +207,28 @@ const WIKI_ICON = {
   weeksEl.addEventListener("input",(e)=>{ const card=e.target.closest("[data-week]"); if(!card) return; const w=Number(card.getAttribute("data-week"));
     const day=Number(e.target.getAttribute("data-day")); if(!Number.isInteger(w)||!Number.isInteger(day)) return;
     const val=Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value)||0)); state.weeks[w][day]=val;
-    const siblings=card.querySelectorAll(`[data-day="\${day}"]`); siblings.forEach(inp=>{ if(inp!==e.target) inp.value=val; }); updateKpis(); });
+    const siblings=card.querySelectorAll(`[data-day="${day}"]`); siblings.forEach(inp=>{ if(inp!==e.target) inp.value=val; }); updateKpis(); });
   weeksEl.addEventListener("click",(e)=>{ const btn=e.target.closest("button[data-act]"); if(!btn) return; const card=e.target.closest("[data-week]"); const w=Number(card.getAttribute("data-week"));
     const act=btn.getAttribute("data-act"); if(act==="dup"){ state.weeks.push([...(state.weeks[w]||Array(7).fill(0))]); }
     if(act==="clear"){ state.weeks[w]=Array(7).fill(0); }
     if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
 
-  function setSkill(s){ state.skillIdx=s.idx; state.skillKey=s.key; const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`; skillIcon.src=local; skillIcon.onerror=()=>{ skillIcon.onerror=null; skillIcon.src=wiki; }; skillLabel.textContent=s.name; byId("skill").value=s.idx; updateKpis(); }
-  function buildSkillPanel(){
-    const panel=document.getElementById("skillPanel"); const grid=document.createElement("div"); grid.className="skill-grid";
-    SKILLS.forEach(s=>{
-      const item=document.createElement("div"); item.className="skill-item"; item.setAttribute("data-idx", s.idx);
-      const img=document.createElement("img");
-      const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`;
-      img.src=local; img.alt=s.name; img.onerror=()=>{ img.onerror=null; img.src=wiki; };
-      const span=document.createElement("span"); span.textContent=s.name;
-      item.appendChild(img); item.appendChild(span);
-      item.addEventListener("click", ()=>{ setSkill(s); panel.style.display='none'; });
-      grid.appendChild(item);
-    });
-    panel.appendChild(grid);
-    document.getElementById("skillBtn").addEventListener("click", ()=>{ panel.style.display = (panel.style.display==='block') ? 'none' : 'block'; });
-    window.addEventListener("click", (e)=>{ if(!document.getElementById("skillPicker").contains(e.target)) panel.style.display='none'; });
-    const hidden=byId("skill"); hidden.innerHTML=SKILLS.map(s=>`<option value="\${s.idx}">\${s.name}</option>`).join("");
-  }
+  document.getElementById("addWeekBtn").addEventListener("click", ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{ localStorage.setItem("osrs_skilling_plan_named:v4_1e", JSON.stringify(state)); alert("Saved!"); });
+  document.getElementById("loadBtn").addEventListener("click", ()=>{ const raw=localStorage.getItem("osrs_skilling_plan_named:v4_1e"); if(!raw) return alert("No saved plan found."); state=JSON.parse(raw); hydrate(); mountWeeks(); updateKpis(); });
+  document.getElementById("resetBtn").addEventListener("click", ()=>{ if(!confirm("Reset everything?")) return; state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); });
 
-  async function fetchHiscores(name, mode){
-    const encoded=encodeURIComponent(name);
-    const base = \`https://secure.runescape.com/m=\${mode}/index_lite.ws?player=\${encoded}\`;
-    const proxies = [
-      \`https://api.codetabs.com/v1/proxy?quest=\${encodeURIComponent(base)}\`,
-      \`https://api.allorigins.win/raw?url=\${encodeURIComponent(base)}\`
-    ];
-    const tries = [{url: base, label: "direct"}, ...proxies.map(u=>({url:u, label:"proxy"}))];
-    fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
-    let text=null;
-    for(const t of tries){
-      try{
-        const res=await fetch(t.url);
-        if(!res.ok) throw new Error("HTTP "+res.status);
-        text=await res.text();
-        if(!/^-?\d+,-?\d+,-?\d+(\n|$)/.test(text)) throw new Error("Unexpected format");
-        parseHiscores(text); state.lastUpdated=Date.now();
-        fetchMsg.textContent=(t.label==="direct"?"Loaded (direct)":"Loaded (via proxy)"); fetchMsg.className="success small"; updateKpis(); return;
-      }catch(e){ /* try next */ }
-    }
-    fetchMsg.textContent="❌ Could not fetch hiscores — check internet or Safari privacy settings."; fetchMsg.className="error small";
-    updateKpis();
-  }
-  function parseHiscores(text){
-    const lines=text.trim().split("\n"); const stats={};
-    for(let i=0;i<lines.length;i++){ const p=lines[i].split(",").map(x=>Number(x)); if(p.length>=3){ stats[i]={rank:p[0], level:Math.max(0,p[1]), xp:Math.max(0,p[2])}; } }
-    state.hiscores=stats;
-  }
+  function hydrate(){ skillSel.value=state.skillIdx||SKILLS[0].idx; targetSel.value=state.targetLevel||99; xpPerHourEl.value=state.xpPerHour||""; }
 
-  document.getElementById("fetchBtn").addEventListener("click", ()=>{
-    state.rsn=rsnEl.value.trim(); state.mode=modeEl.value; if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; }
-    fetchHiscores(state.rsn, state.mode);
-  });
-
-  // Init
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_3a"); if(saved) state=JSON.parse(saved); }catch{}
-  populateLevels(); buildSkillPanel(); setSkill(SKILLS[10]); // Fishing default
-  mountWeeks(); updateKpis();
+  // (Fetching code omitted here to keep focus on layout; use your existing v4.1d index's fetch if needed)
+  // For this layout-only build we'll mock hiscores when empty so you can see UI without network:
+  state.hiscores = state.hiscores || {11:{level:87,xp:4216812}}; // Fishing as example
+  populateSkills(); populateLevels(); hydrate(); mountWeeks(); updateKpis();
 })();
 </script>
 
-<!-- Bulletproof splash removal -->
 <script>
-(function(){
-  function hideSplash(){
-    const root = document.getElementById('appRoot');
-    if (root) root.style.visibility = 'visible';
-    const s = document.getElementById('splash');
-    if (s) { s.classList.add('fade-out'); setTimeout(()=> s && s.remove(), 600); }
-  }
-  document.addEventListener('DOMContentLoaded', hideSplash, {once:true});
-  window.addEventListener('load', hideSplash, {once:true});
-  window.addEventListener('error', hideSplash, {once:true});
-  setTimeout(hideSplash, 1800);
-})();
-</script>
-
-<!-- Service worker: allow bypass with ?no-sw=1 -->
-<script>
-if ('serviceWorker' in navigator && !location.search.includes('no-sw=1')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-  });
-}
+if('serviceWorker' in navigator){ window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
 </script>
 </body>
 </html>
