@@ -2,395 +2,339 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OSRS Skilling Planner — v4.3d</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="favicon.png" sizes="any">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OSRS Skilling Planner — v4.3g-fix</title>
 <meta name="theme-color" content="#0b0d12" />
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
-  :root { --bg:#0b0d12; --stone:#141824; --stone-2:#0f1320; --edge:#2a2f45; --muted:#9aa3b2; --text:#f0f3f9; --gold:#e6c36a; --gold-2:#ffdb7d; --accent:#6ee7b7; --accent-2:#8ab4f8; --danger:#f97070; --good:#86efac; }
-  *{ box-sizing:border-box; }
-  html,body{ margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; overflow-x:hidden;}
-  a{ color:var(--accent-2); }
-  .wrap{ max-width:1040px; margin:18px auto 80px; padding:0 14px; }
-  header{ display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; flex-wrap:wrap;}
-  .brand{ display:flex;align-items:center;gap:10px; }
-  h1{ font-size:20px;margin:0;letter-spacing:.3px;color:var(--gold);text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15); }
-  .card{ background:linear-gradient(180deg,var(--stone),var(--stone-2));border:1px solid var(--edge); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
-  .grid{ display:grid;grid-template-columns:repeat(12,1fr);gap:12px; }
-  .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1 / -1}
-  label{ display:block;font-size:12px;color:var(--muted);margin-bottom:6px; }
-  input[type="number"],input[type="text"],select{ width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px; }
-  .row{ display:flex;gap:12px;align-items:center;flex-wrap:wrap }
-  .btn{ appearance:none;border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700; white-space:nowrap; }
-  .btn:hover{ filter:brightness(1.05) } .btn.outline{ background:transparent;color:var(--gold);border-color:#5a4a1f }
-  .pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a2f45;background:#111522;font-size:12px;color:var(--muted) }
-  .kpi{ display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:#0e1220;border:1px solid #23283a }
-  .kpi .big{ font-weight:800;font-size:22px;color:var(--gold-2) }
-  .progress{ height:12px;border-radius:999px;border:1px solid #2a2f45;background:#0d111b;overflow:hidden }
-  .progress>div{ height:100%;width:0%;background:linear-gradient(90deg,#24c8a8,#5fb3ff) }
-  .week-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
-  .week{ display:grid; gap:12px; grid-auto-rows:1fr; grid-template-columns: repeat( auto-fill, minmax(150px, 1fr) ); }
-  @media (min-width:1000px){ .week{ grid-template-columns: repeat(7, minmax(140px, 1fr)); } }
-  .day{ background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:10px }
-  .day h4{ margin:0 0 6px;font-size:13px;color:#c2c9d6;letter-spacing:.2px;display:flex;align-items:center;gap:6px }
-  input[type="range"]{ width:100%;margin:6px 0;-webkit-appearance:none;background:transparent }
-  input[type="range"]::-webkit-slider-runnable-track{ height:10px;border-radius:999px;background:#2b3146 }
-  input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none;width:24px;height:24px;border-radius:50%;margin-top:-7px;background:#8ab4f8;border:2px solid #0f1424 }
-  .hr-row{ display:flex;align-items:center;gap:8px; flex-wrap:nowrap }
-  .hr{ width:80px;text-align:right;padding:6px 8px;border-radius:8px;border:1px solid #2a2f45;background:#0d1017;color:var(--text) }
-  .footer { text-align:center; font-size:12px; color:#98a1b3; margin:30px 0 10px; }
-
-  .skill-picker { position:relative; }
-  .skill-btn { width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #2a2f45; border-radius:9px; background:#0c1019; color:var(--text); cursor:pointer; }
-  .skill-btn img{ width:22px; height:22px; border-radius:4px; }
-  .skill-panel { position:absolute; z-index:50; left:0; width:min(620px,96vw); margin-top:6px; background:#0f1320; border:1px solid #23283a; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.4); display:none; max-height:70vh; overflow-y:auto; overflow-x:hidden; padding:12px; }
-  .skill-grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-  @media (max-width:520px){ .skill-grid{ grid-template-columns:1fr; } }
-  .skill-item { display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #23283a; border-radius:8px; background:#0e1220; cursor:pointer; }
-  .skill-item:hover{ background:#10162a; }
-  .skill-item img{ width:22px; height:22px; border-radius:4px; }
-
-  /* Splash */
-  #splash {
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(800px 400px at 20% 10%, rgba(138,180,248,.08), transparent 60%),
-                radial-gradient(700px 340px at 90% 20%, rgba(36,200,168,.08), transparent 60%),
-                radial-gradient(800px 420px at 40% 90%, rgba(230,195,106,.10), transparent 60%),
-                #0b0d12;
-    z-index:999;
-  }
-  .splash-card{
-    display:flex; flex-direction:column; align-items:center; gap:14px;
-    padding:26px 28px; background:#0f1320; border:1px solid #23283a; border-radius:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
-  }
-  .splash-card img{ width:96px; height:96px; border-radius:20px; }
-  .splash-title{ font-weight:800; color:var(--gold-2); }
-  .splash-sub{ color:#9aa3b2; font-size:13px; }
-  .fade-out{ animation:fadeout .45s ease forwards; }
-  @keyframes fadeout{ to{ opacity:0; transform:translateY(6px); } }
-
-  /* Debug overlay */
-  #debugToggle { display:inline-block; margin-top:8px; color:#9aa3b2; font-size:11px; cursor:pointer; }
-  #debugPanel {
-    position: fixed; right: 12px; bottom: 12px; width: min(92vw, 520px);
-    max-height: 40vh; overflow: auto; padding: 10px 12px;
-    background: rgba(15,19,32,.94); color: #d1d6e3; border: 1px solid #2a2f45; border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.4); font-size: 12px; display:none; z-index: 9999;
-  }
-  #debugPanel pre { white-space: pre-wrap; word-break: break-word; margin:0; }
-  @media (max-width: 600px) {
-    #debugPanel { max-height: 30vh; }
-  }
+:root{--bg:#0b0d12;--stone:#141824;--stone2:#0f1320;--edge:#2a2f45;--text:#f0f3f9;--muted:#9aa3b2;--gold:#e6c36a;--gold2:#ffdb7d;--accent:#8ab4f8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+.wrap{max-width:1080px;margin:18px auto 80px;padding:0 14px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+h1{font-size:20px;color:var(--gold);margin:0;text-shadow:0 1px 0 #433,0 0 6px rgba(230,195,106,.15)}
+.btn{border:1px solid #463a1a;background:linear-gradient(180deg,#e6c36a,#caa64f);color:#1a1208;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+.btn:hover{filter:brightness(1.05)}.btn.outline{background:transparent;color:var(--gold);border-color:#5a4a1f}
+.card{background:linear-gradient(180deg,var(--stone),var(--stone2));border:1px solid var(--edge);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+input,select{width:100%;background:#0c1019;border:1px solid #2a2f45;color:var(--text);padding:10px 12px;border-radius:9px}
+.kpi{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:#0e1220;border:1px solid #23283a}
+.kpi .big{font-weight:800;font-size:22px;color:var(--gold2)}
+.progress{height:12px;border-radius:999px;border:1px solid #2a2f45;background:#0d111b;overflow:hidden}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#24c8a8,#5fb3ff);transition:width .25s ease}
+.week-wrap{overflow-x:auto;padding-bottom:6px}
+.week{display:grid;gap:12px;grid-template-columns:repeat(7,minmax(140px,1fr))}
+.day{background:#0f1320;border:1px solid #23283a;border-radius:10px;padding:10px}
+.day h4{margin:0 0 6px;font-size:13px;color:#c2c9d6}
+input[type=range]{width:100%;background:transparent}
+.footer{text-align:center;font-size:12px;color:#98a1b3;margin:30px 0 10px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a2f45;background:#111522;font-size:12px;color:var(--muted)}
+.skill-picker{position:relative}
+.skill-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #2a2f45;border-radius:9px;background:#0c1019;color:var(--text);cursor:pointer}
+.skill-btn img{width:22px;height:22px;border-radius:4px}
+.skill-panel{position:absolute;z-index:50;left:0;width:min(620px,96vw);margin-top:6px;background:#0f1320;border:1px solid #23283a;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.4);display:none;max-height:70vh;overflow-y:auto;padding:12px}
+.skill-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.skill-item{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #23283a;border-radius:8px;background:#0e1220;cursor:pointer}
+.skill-item:hover{background:#10162a}
+#splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0d12;z-index:999}
+.fade-out{animation:fadeout .45s ease forwards}@keyframes fadeout{to{opacity:0;transform:translateY(6px)}}
 </style>
 </head>
 <body>
-  <div id="splash" aria-hidden="true">
-    <div class="splash-card">
-      <img src="animated-icon.gif" alt="loading">
-      <div class="splash-title">OSRS Skilling Planner</div>
-      <div class="splash-sub">Loading saved data & hiscores…</div>
-    </div>
+<div id="splash"><h1 style="color:var(--gold)">Loading…</h1></div>
+
+<div class="wrap" id="appRoot" style="visibility:hidden">
+<header>
+  <h1>OSRS Skilling Planner <small>v4.3g-fix</small></h1>
+  <div class="row">
+    <button id="saveBtn"  class="btn outline">Save</button>
+    <button id="loadBtn"  class="btn outline">Load</button>
+    <button id="resetBtn" class="btn outline">Reset</button>
+    <button id="exportBtn" class="btn outline">Export</button>
+    <input id="importInput" type="file" accept=".json" style="display:none" />
+    <button id="importBtn" class="btn outline">Import</button>
+    <button id="addWeekBtn" class="btn">+ Add Week</button>
   </div>
+</header>
 
-  <div class="wrap" style="visibility:hidden" id="appRoot">
-    <header>
-      <div class="brand"><h1>OSRS Skilling Planner</h1><span class="pill">v4.3d</span></div>
-      <div class="row">
-        <button id="saveBtn" class="btn outline">Save</button>
-        <button id="loadBtn" class="btn outline">Load</button>
-        <button id="resetBtn" class="btn outline">Reset</button>
-        <button id="exportBtn" class="btn outline">Export</button>
-        <input id="importInput" type="file" accept=".json" style="display:none" />
-        <button id="importBtn" class="btn outline">Import</button>
-        <button id="addWeekBtn" class="btn">+ Add Week</button>
-      </div>
-    </header>
+<div class="card grid">
+  <div class="span-4"><label>RuneScape name</label><input id="rsn" type="text" value="D 3VI L"></div>
+  <div class="span-4"><label>Hiscore type</label>
+    <select id="mode">
+      <option value="hiscore_oldschool">Normal</option>
+      <option value="hiscore_oldschool_ironman">Ironman</option>
+      <option value="hiscore_oldschool_ultimate">Ultimate</option>
+      <option value="hiscore_oldschool_hardcore_ironman">Hardcore</option>
+    </select>
+  </div>
+  <div class="span-4"><label>&nbsp;</label><button id="fetchBtn" class="btn">Fetch Hiscores</button></div>
 
-    <div class="card grid">
-      <div class="span-4"><label for="rsn">RuneScape Name</label><input id="rsn" type="text" placeholder="Your RSN" value="D 3VI L" /></div>
-      <div class="span-4"><label for="mode">Hiscore type</label>
-        <select id="mode">
-          <option value="hiscore_oldschool">Normal (OSRS)</option>
-          <option value="hiscore_oldschool_ironman">Ironman</option>
-          <option value="hiscore_oldschool_ultimate">Ultimate Ironman</option>
-          <option value="hiscore_oldschool_hardcore_ironman">Hardcore Ironman</option>
-        </select>
-      </div>
+  <div class="span-12 card" style="border-color:#4a3b1a">
+    <div class="pill">🎯 Goal setup</div>
+    <div class="grid" style="margin-top:10px">
       <div class="span-4">
-        <label>&nbsp;</label>
-        <div class="row">
-          <button id="fetchBtn" class="btn">Fetch Hiscores</button>
-          <span id="fetchMsg" class="muted small"></span>
+        <label>Skill</label>
+        <div class="skill-picker" id="skillPicker">
+          <button type="button" id="skillBtn" class="skill-btn">
+            <img id="skillIcon" src="assets/skills/fishing.png" alt=""><span id="skillLabel">Fishing</span>
+          </button>
+          <div class="skill-panel" id="skillPanel"></div>
         </div>
       </div>
+      <div class="span-4"><label>Target level</label><select id="targetLevel"></select></div>
+      <div class="span-4"><label>XP/hr</label><input id="xpPerHour" type="number" value="90000"></div>
 
-      <div class="span-12 card" style="border-color:#4a3b1a">
-        <div class="pill">🎯 Goal setup</div>
-        <div class="grid" style="margin-top:10px;gap:12px;grid-template-columns:repeat(12,1fr)">
-          <div class="span-4">
-            <label>Skill</label>
-            <div class="skill-picker" id="skillPicker">
-              <button class="skill-btn" type="button" id="skillBtn">
-                <img id="skillIcon" src="assets/skills/fishing.png" alt="">
-                <span id="skillLabel">Fishing</span>
-              </button>
-              <div class="skill-panel" id="skillPanel"></div>
-            </div>
-            <select id="skill" style="display:none"></select>
-          </div>
-          <div class="span-4"><label for="targetLevel">Target level</label><select id="targetLevel"></select></div>
-          <div class="span-4"><label for="xpPerHour">XP per hour</label><input id="xpPerHour" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 90,000" data-autoclear="1" /></div>
-          <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted small">from hiscores</span></div></div>
-          <div class="span-3"><label>Current XP</label><div class="kpi"><span class="big" id="curXp">—</span><span class="muted small">from hiscores</span></div></div>
-          <div class="span-3"><label>Target XP</label><div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted small">calc from level</span></div></div>
-          <div class="span-3"><label>XP to goal</label><div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted small">tgt - current</span></div></div>
-          <div class="span-12" style="margin-top:6px;"><div class="progress"><div id="progressFill"></div></div></div>
-          <div class="span-12 small muted" id="lastUpdatedRow" style="display:none;">Last hiscores sync: <span id="lastUpdated"></span></div>
-        </div>
-      </div>
+      <div class="span-3"><label>Current level</label><div class="kpi"><span class="big" id="curLevel">—</span><span class="muted">from hiscores</span></div></div>
+      <div class="span-3"><label>Current XP</label><div class="kpi"><span class="big" id="curXp">—</span><span class="muted">from hiscores</span></div></div>
+      <div class="span-3"><label>Target XP</label><div class="kpi"><span class="big" id="tgtXp">—</span><span class="muted">calc from level</span></div></div>
+      <div class="span-3"><label>XP to goal</label><div class="kpi"><span class="big" id="xpRemainingKpi">—</span><span class="muted">tgt − current</span></div></div>
 
-      <div class="span-12 row" style="margin-top:8px;">
-        <div class="kpi"><span class="muted">Hours needed</span><span id="hoursNeeded" class="big">0</span></div>
-        <div class="kpi"><span class="muted">Hours allocated (all weeks)</span><span id="hoursAllocated" class="big">0</span></div>
-        <div class="kpi"><span class="muted">Hours remaining</span><span id="hoursRemaining" class="big">0</span></div>
-        <div class="kpi"><span class="muted">Projected finish (est.)</span><span id="eta" class="big">—</span></div>
-      </div>
+      <div class="span-12"><div class="progress"><div id="progressFill"></div></div></div>
     </div>
-
-    <div id="weeks"></div>
-
-    <footer class="footer">
-      Old School RuneScape assets © Jagex Ltd. Used under Jagex’s
-      <a href="https://www.jagex.com/en-GB/terms/fan-content-policy" target="_blank" rel="noopener noreferrer">Fan Content Policy</a>.
-      This is a free, non-commercial fan tool.
-      <br/>
-      <a id="debugToggle">Show console overlay</a>
-    </footer>
   </div>
 
-<div id="debugPanel"><pre id="debugOut"></pre></div>
+  <div class="span-12" style="display:flex;gap:12px;flex-wrap:wrap">
+    <div class="kpi"><span class="muted">Hours needed</span><span id="hoursNeeded" class="big">0</span></div>
+    <div class="kpi"><span class="muted">Hours allocated (all weeks)</span><span id="hoursAllocated" class="big">0</span></div>
+    <div class="kpi"><span class="muted">Hours remaining</span><span id="hoursRemaining" class="big">0</span></div>
+    <div class="kpi"><span class="muted">Projected finish (est.)</span><span id="eta" class="big">—</span></div>
+  </div>
+</div>
+
+<div id="weeks"></div>
+
+<footer class="footer">
+  Old School RuneScape assets © Jagex Ltd — used under Jagex’s
+  <a href="https://www.jagex.com/en-GB/terms/fan-content-policy" target="_blank" rel="noopener">Fan Content Policy</a>. Free, non-commercial fan tool.
+</footer>
+</div>
 
 <script>
-// XP table
-const XP_TABLE = (() => {
-  const xp = Array(127).fill(0); let points = 0; xp[1] = 0;
-  for (let L = 2; L <= 126; L++) { const i = L - 1; points += Math.floor(i + 300 * Math.pow(2, i / 7)); xp[L] = Math.floor(points / 4); }
-  return xp;
+(function(){
+/* ---------- XP table ---------- */
+const XP = (() => { const xp = Array(127).fill(0); let p=0; for(let L=1; L<=126; L++){ p += Math.floor(L + 300*Math.pow(2,L/7)); xp[L] = Math.floor(p/4); } return xp; })();
+
+/* ---------- Skills (key order matches OSRS hiscores block) ---------- */
+const SK = [
+ {k:"attack"},{k:"defence"},{k:"strength"},{k:"hitpoints"},{k:"ranged"},{k:"prayer"},{k:"magic"},{k:"cooking"},
+ {k:"woodcutting"},{k:"fletching"},{k:"fishing"},{k:"firemaking"},{k:"crafting"},{k:"smithing"},{k:"mining"},
+ {k:"herblore"},{k:"agility"},{k:"thieving"},{k:"slayer"},{k:"farming"},{k:"runecraft"},{k:"hunter"},{k:"construction"}
+];
+
+/* ---------- Dom refs ---------- */
+const root = document.getElementById("appRoot");
+const splash = document.getElementById("splash");
+const rsnEl  = document.getElementById("rsn");
+const modeEl = document.getElementById("mode");
+const fetchBtn = document.getElementById("fetchBtn");
+const skillBtn = document.getElementById("skillBtn");
+const skillPanel = document.getElementById("skillPanel");
+const skillIcon = document.getElementById("skillIcon");
+const skillLabel= document.getElementById("skillLabel");
+const targetSel = document.getElementById("targetLevel");
+const xpPerHourEl = document.getElementById("xpPerHour");
+
+const curLevelEl = document.getElementById("curLevel");
+const curXpEl    = document.getElementById("curXp");
+const tgtXpEl    = document.getElementById("tgtXp");
+const xpRemEl    = document.getElementById("xpRemainingKpi");
+const progressFill = document.getElementById("progressFill");
+
+const hoursNeededEl = document.getElementById("hoursNeeded");
+const hoursAllocEl  = document.getElementById("hoursAllocated");
+const hoursRemEl    = document.getElementById("hoursRemaining");
+const etaEl         = document.getElementById("eta");
+const weeksEl       = document.getElementById("weeks");
+const addWeekBtn    = document.getElementById("addWeekBtn");
+
+const MAX_HOURS_PER_DAY = 24;
+
+/* ---------- Splash ---------- */
+function hideSplash(){ splash.classList.add("fade-out"); setTimeout(()=>splash.remove(),600); root.style.visibility="visible"; }
+window.addEventListener("load", hideSplash);
+
+/* ---------- State ---------- */
+let state = {
+  rsn: rsnEl.value || "",
+  mode: modeEl.value,
+  skillIdx: 11,        // default Fishing (index in hiscores block is +1 due to overall at 0)
+  skillKey: "fishing",
+  targetLevel: 91,
+  xpPerHour: 90000,
+  hiscores: null,
+  weeks: [Array(7).fill(0)]
+};
+
+/* ---------- UI builders ---------- */
+for(let L=1; L<=126; L++){ const o=document.createElement("option"); o.value=L; o.textContent=L; if(L===state.targetLevel) o.selected=true; targetSel.appendChild(o); }
+
+(function buildSkillPanel(){
+  const grid = document.createElement("div"); grid.className="skill-grid";
+  SK.forEach((s,idx)=>{
+    const item=document.createElement("div"); item.className="skill-item";
+    const img=document.createElement("img"); img.src="assets/skills/"+s.k+".png"; img.alt=s.k;
+    const span=document.createElement("span"); span.textContent=s.k[0].toUpperCase()+s.k.slice(1);
+    item.append(img,span);
+    item.onclick=()=>{ state.skillIdx=idx+1; state.skillKey=s.k; skillIcon.src=img.src; skillLabel.textContent=span.textContent; updateKpis(); skillPanel.style.display="none"; };
+    grid.appendChild(item);
+  });
+  skillPanel.appendChild(grid);
+  skillBtn.onclick=()=>skillPanel.style.display = (skillPanel.style.display==='block')?'none':'block';
+  window.addEventListener('click', (e)=>{ if(!document.getElementById('skillPicker').contains(e.target)) skillPanel.style.display='none'; });
 })();
 
-const SKILLS = [
-  { key:"attack", name:"Attack", idx: 1 },{ key:"defence", name:"Defence", idx: 2 },{ key:"strength", name:"Strength", idx: 3 },{ key:"hitpoints", name:"Hitpoints", idx: 4 },
-  { key:"ranged", name:"Ranged", idx: 5 },{ key:"prayer", name:"Prayer", idx: 6 },{ key:"magic", name:"Magic", idx: 7 },{ key:"cooking", name:"Cooking", idx: 8 },
-  { key:"woodcutting", name:"Woodcutting", idx: 9 },{ key:"fletching", name:"Fletching", idx: 10 },{ key:"fishing", name:"Fishing", idx: 11 },{ key:"firemaking", name:"Firemaking", idx: 12 },
-  { key:"crafting", name:"Crafting", idx: 13 },{ key:"smithing", name:"Smithing", idx: 14 },{ key:"mining", name:"Mining", idx: 15 },{ key:"herblore", name:"Herblore", idx: 16 },
-  { key:"agility", name:"Agility", idx: 17 },{ key:"thieving", name:"Thieving", idx: 18 },{ key:"slayer", name:"Slayer", idx: 19 },{ key:"farming", name:"Farming", idx: 20 },
-  { key:"runecraft", name:"Runecraft", idx: 21 },{ key:"hunter", name:"Hunter", idx: 22 },{ key:"construction", name:"Construction", idx: 23 },
-};
-
-// Wiki fallback mapping for authentic icons (optional; local files override)
-const WIKI_ICON = {
-  attack:"Attack_icon.png", defence:"Defence_icon.png", strength:"Strength_icon.png",
-  hitpoints:"Hitpoints_icon.png", ranged:"Ranged_icon.png", prayer:"Prayer_icon.png",
-  magic:"Magic_icon.png", cooking:"Cooking_icon.png", woodcutting:"Woodcutting_icon.png",
-  fletching:"Fletching_icon.png", fishing:"Fishing_icon.png", firemaking:"Firemaking_icon.png",
-  crafting:"Crafting_icon.png", smithing:"Smithing_icon.png", mining:"Mining_icon.png",
-  herblore:"Herblore_icon.png", agility:"Agility_icon.png", thieving:"Thieving_icon.png",
-  slayer:"Slayer_icon.png", farming:"Farming_icon.png", runecraft:"Runecraft_icon.png",
-  hunter:"Hunter_icon.png", construction:"Construction_icon.png",
-};
-
-(function(){
-  const byId=(id)=>document.getElementById(id);
-  const root = byId("appRoot"); const splash = byId("splash");
-  const weeksEl=byId("weeks"), rsnEl=byId("rsn"), modeEl=byId("mode"), fetchBtn=byId("fetchBtn"), fetchMsg=byId("fetchMsg");
-  const skillHidden=byId("skill"), skillBtn=byId("skillBtn"), skillPanel=byId("skillPanel"), skillIcon=byId("skillIcon"), skillLabel=byId("skillLabel");
-  const targetSel=byId("targetLevel"), curLevelEl=byId("curLevel"), curXpEl=byId("curXp"), tgtXpEl=byId("tgtXp"), xpRemEl=byId("xpRemainingKpi"), progressFill=byId("progressFill");
-  const hoursNeededEl=byId("hoursNeeded"), hoursAllocatedEl=byId("hoursAllocated"), hoursRemainingEl=byId("hoursRemaining"), etaEl=byId("eta");
-  const lastUpdatedRow=byId("lastUpdatedRow"), lastUpdatedEl=byId("lastUpdated");
-  const xpPerHourEl=byId("xpPerHour");
-
-  // Debug overlay
-  const debugOut = byId('debugOut'); const debugPanel = byId('debugPanel'); const debugToggle = byId('debugToggle');
-  function showDebug(msg){ debugOut.textContent += (msg + "\n"); debugPanel.style.display = 'block'; debugToggle.textContent = 'Hide console overlay'; }
-  function hideDebug(){ debugPanel.style.display = 'none'; debugToggle.textContent = 'Show console overlay'; }
-  debugToggle.addEventListener('click', ()=>{ if(debugPanel.style.display==='block'){ hideDebug(); } else { debugPanel.style.display='block'; } });
-
-  // Auto-hide on small screens when tapping outside
-  document.addEventListener('click', (e)=>{
-    if (window.innerWidth <= 600 && debugPanel.style.display==='block') {
-      if (!debugPanel.contains(e.target) && e.target !== debugToggle) hideDebug();
-    }
-  }, true);
-
-  window.addEventListener('error', (e)=>{ showDebug(String(e.message||e.error||'Unknown error')); });
-
-  const MAX_HOURS_PER_DAY=24;
-  let state={ rsn:rsnEl.value||"", mode:modeEl.value, skillIdx:11, skillKey:"fishing", targetLevel:91, xpPerHour:90000, startDate:"",
-    hiscores:null, lastUpdated:null, weeks:[Array(7).fill(0)] };
-
-  function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="\${L}" \${L===state.targetLevel?'selected':''}>\${L}</option>`);} targetSel.innerHTML=opts.join(""); }
-  function ceil2(n){ return Math.ceil(n*100)/100 } function formatNum(n){ return (n||0).toLocaleString() }
-  function formatHours(h){ if(!isFinite(h)||h<0) return "0"; const f=h-Math.floor(h); return f===0?String(Math.floor(h)):h.toFixed(2) }
-  function sumAllocated(){ return ceil2(state.weeks.flat().reduce((a,b)=>a+(Number(b)||0),0)) }
-  function computeNeededHours(xpRemaining){ const rate=Math.max(1, Number(xpPerHourEl.value||state.xpPerHour)||1); state.xpPerHour=rate; return xpRemaining<=0?0:ceil2(xpRemaining/rate) }
-
-  function updateKpis(){
-    const cur=(state.hiscores&&state.hiscores[state.skillIdx])?state.hiscores[state.skillIdx]:{level:1, xp:0};
-    curLevelEl.textContent=cur.level||1; curXpEl.textContent=formatNum(cur.xp||0);
-    const targetLevel=Number(targetSel.value||state.targetLevel||1); state.targetLevel=targetLevel;
-    const tgtXp=XP_TABLE[targetLevel]||0; tgtXpEl.textContent=formatNum(tgtXp);
-    let xpRemaining=Math.max(0, tgtXp-(cur.xp||0)); if((cur.level||1)>=targetLevel) xpRemaining=0;
-    xpRemEl.textContent=formatNum(xpRemaining);
-    const hoursNeeded=computeNeededHours(xpRemaining); hoursNeededEl.textContent=formatHours(hoursNeeded);
-    const allocated=sumAllocated(); hoursAllocatedEl.textContent=formatHours(allocated);
-    const remainingH=Math.max(0, ceil2(hoursNeeded-allocated)); hoursRemainingEl.textContent=formatHours(remainingH);
-    const pct=hoursNeeded>0?Math.min(100, Math.max(0, (allocated/hoursNeeded)*100)):0; progressFill.style.width=pct+"%";
-    etaEl.textContent="—";
-    if(state.lastUpdated){ lastUpdatedRow.style.display="block"; lastUpdatedEl.textContent=new Date(state.lastUpdated).toLocaleString(); } else { lastUpdatedRow.style.display="none"; }
-    try{ localStorage.setItem("osrs_skilling_plan_v4_3d", JSON.stringify(state)); }catch(e){ showDebug('localStorage failed: '+e); }
-  }
-
-  function weekTemplate(index){ const total=ceil2(state.weeks[index].reduce((a,b)=>a+(Number(b)||0),0));
-    return `<div class="card" data-week="\${index}">
-      <div class="row" style="justify-content:space-between; margin-bottom:8px;">
-        <div class="pill">Week \${index+1}</div>
-        <div class="row"><div class="pill"><strong>Total:</strong>&nbsp;<span class="accent">\${formatHours(total)}</span> h</div>
-        <button class="btn outline" data-act="dup">Duplicate</button><button class="btn outline" data-act="clear">Clear</button><button class="btn outline" data-act="del">Delete</button></div>
+/* ---------- Weeks ---------- */
+function weekCard(i){
+  const hours = state.weeks[i];
+  return `<div class="card" data-week="${i}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="pill">Week ${i+1}</div>
+      <div>
+        <button class="btn outline" data-act="dup">Duplicate</button>
+        <button class="btn outline" data-act="clear">Clear</button>
+        <button class="btn outline" data-act="del">Delete</button>
       </div>
-      <div class="week-wrap"><div class="week">${
-        ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`
-          <div class="day"><h4>\${d}</h4>
-            <input type="range" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" />
-            <div class="hr-row"><span class="muted">Hours</span>
-              <input class="hr" type="number" inputmode="decimal" min="0" max="\${MAX_HOURS_PER_DAY}" step="0.25" value="\${state.weeks[index][i]||0}" data-day="\${i}" data-autoclear="1" />
-            </div>
-          </div>`).join('')
-      }</div></div>
-    </div>`;
-  }
-  function mountWeeks(){ weeksEl.innerHTML=state.weeks.map((_,i)=>weekTemplate(i)).join(""); weeksEl.querySelectorAll('input[data-autoclear="1"]').forEach(attachAutoClear); }
-  function ensureOneWeek(){ if(!state.weeks.length) state.weeks.push(Array(7).fill(0)); }
-  function attachAutoClear(el){ if(!el) return; el.addEventListener("focus", ()=>{ if(el.dataset.cleared!=="1") el.select(); });
-    el.addEventListener("pointerdown", ()=>{ if(el.dataset.cleared!=="1") setTimeout(()=>{ try{ el.select(); }catch{} },0); });
-    el.addEventListener("input", ()=>{ if(el.dataset.cleared!=="1") el.dataset.cleared="1"; }); }
-  weeksEl.addEventListener("input",(e)=>{ const card=e.target.closest("[data-week]"); if(!card) return; const w=Number(card.getAttribute("data-week"));
-    const day=Number(e.target.getAttribute("data-day")); if(!Number.isInteger(w)||!Number.isInteger(day)) return;
-    const val=Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value)||0)); state.weeks[w][day]=val;
-    const siblings=card.querySelectorAll(`[data-day="\${day}"]`); siblings.forEach(inp=>{ if(inp!==e.target) inp.value=val; }); updateKpis(); });
-  weeksEl.addEventListener("click",(e)=>{ const btn=e.target.closest("button[data-act]"); if(!btn) return; const card=e.target.closest("[data-week]"); const w=Number(card.getAttribute("data-week"));
-    const act=btn.getAttribute("data-act"); if(act==="dup"){ state.weeks.push([...(state.weeks[w]||Array(7).fill(0))]); }
-    if(act==="clear"){ state.weeks[w]=Array(7).fill(0); }
-    if(act==="del"){ state.weeks.splice(w,1); } ensureOneWeek(); mountWeeks(); updateKpis(); });
+    </div>
+    <div class="week-wrap"><div class="week">
+      ${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,idx)=>`
+        <div class="day">
+          <h4>${d}</h4>
+          <input type="range" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${hours[idx]||0}" data-day="${idx}">
+          <div style="display:flex;gap:8px;align-items:center"><span class="muted">Hours</span>
+            <input class="hr" type="number" min="0" max="${MAX_HOURS_PER_DAY}" step="0.25" value="${hours[idx]||0}" data-day="${idx}">
+          </div>
+        </div>`).join("")}
+    </div></div>
+  </div>`;
+}
+function mountWeeks(){ weeksEl.innerHTML = state.weeks.map((_,i)=>weekCard(i)).join(""); }
+function ensureWeek(){ if(!state.weeks.length) state.weeks.push(Array(7).fill(0)); }
+weeksEl.addEventListener("input",(e)=>{
+  const card=e.target.closest("[data-week]"); if(!card) return;
+  const w=+card.getAttribute("data-week"); const d=+e.target.getAttribute("data-day");
+  const val=Math.max(0, Math.min(MAX_HOURS_PER_DAY, Number(e.target.value)||0));
+  state.weeks[w][d]=val;
+  card.querySelectorAll(`[data-day="${d}"]`).forEach(n=>{ if(n!==e.target) n.value=val; });
+  updateKpis();
+});
+weeksEl.addEventListener("click",(e)=>{
+  const btn=e.target.closest("button[data-act]"); if(!btn) return;
+  const w=+e.target.closest("[data-week]").getAttribute("data-week");
+  const act=btn.getAttribute("data-act");
+  if(act==="dup") state.weeks.push([...(state.weeks[w]||Array(7).fill(0))]);
+  if(act==="clear") state.weeks[w]=Array(7).fill(0);
+  if(act==="del") state.weeks.splice(w,1);
+  ensureWeek(); mountWeeks(); updateKpis();
+});
+addWeekBtn.onclick = ()=>{ state.weeks.push(Array(7).fill(0)); mountWeeks(); updateKpis(); };
 
-  function setSkill(s){ state.skillIdx=s.idx; state.skillKey=s.key; const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`; skillIcon.src=local; skillIcon.onerror=()=>{ skillIcon.onerror=null; skillIcon.src=wiki; }; skillLabel.textContent=s.name; byId("skill").value=s.idx; updateKpis(); }
-  function buildSkillPanel(){
-    const panel=document.getElementById("skillPanel"); const grid=document.createElement("div"); grid.className="skill-grid";
-    SKILLS.forEach(s=>{
-      const item=document.createElement("div"); item.className="skill-item"; item.setAttribute("data-idx", s.idx);
-      const img=document.createElement("img");
-      const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`;
-      img.src=local; img.alt=s.name; img.onerror=()=>{ img.onerror=null; img.src=wiki; };
-      const span=document.createElement("span"); span.textContent=s.name;
-      item.appendChild(img); item.appendChild(span);
-      item.addEventListener("click", ()=>{ setSkill(s); panel.style.display='none'; });
-      grid.appendChild(item);
-    });
-    panel.appendChild(grid);
-    document.getElementById("skillBtn").addEventListener("click", ()=>{ panel.style.display = (panel.style.display==='block') ? 'none' : 'block'; });
-    window.addEventListener("click", (e)=>{ if(!document.getElementById("skillPicker").contains(e.target)) panel.style.display='none'; });
-    const hidden=byId("skill"); hidden.innerHTML=SKILLS.map(s=>`<option value="\${s.idx}">\${s.name}</option>`).join("");
+/* ---------- Hiscores (CORS-safe) ---------- */
+async function fetchHiscores(rsn, mode){
+  const base = `https://secure.runescape.com/m=${mode}/index_lite.ws?player=${encodeURIComponent(rsn)}`;
+  const url  = `https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`;
+  const res  = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  const lines = text.trim().split(/\r?\n/);
+  const stats={};
+  for(let i=0;i<lines.length;i++){
+    const p=lines[i].split(","); if(p.length<3) continue;
+    stats[i]={rank:+p[0]||-1, level:+p[1]||0, xp:+p[2]||0};
   }
-
-  // Hiscore fetch (relaxed, v4-1d style; works across CRLF/CSV quirks)
-  async function fetchHiscores(name, mode){
-    const encoded=encodeURIComponent(name);
-    const base = \`https://secure.runescape.com/m=\${mode}/index_lite.ws?player=\${encoded}\`;
-    const proxies = [
-      \`https://api.codetabs.com/v1/proxy?quest=\${encodeURIComponent(base)}\`,
-      \`https://api.allorigins.win/raw?url=\${encodeURIComponent(base)}\`
-    ];
-    const tries = [{url: base, label: "direct"}, ...proxies.map(u=>({url:u, label:"proxy"}))];
-    fetchMsg.textContent="Fetching…"; fetchMsg.className="muted small";
-    let text=null, lastErr=null;
-    for(const t of tries){
-      try{
-        const res=await fetch(t.url, {cache:'no-store'});
-        if(!res.ok) throw new Error("HTTP "+res.status);
-        text=await res.text();
-        // minimal sanity: at least 24 lines (skills block) and first line has 3 comma-separated numbers
-        const lines = text.replace(/\r/g,'').trim().split("\n");
-        if(lines.length < 24) throw new Error("Short response");
-        const first = lines[0].split(",");
-        if(first.length < 3) throw new Error("Bad CSV");
-        parseHiscores(lines);
-        state.lastUpdated=Date.now();
-        fetchMsg.textContent=(t.label==="direct"?"Loaded (direct)":"Loaded (via proxy)");
-        fetchMsg.className="success small"; updateKpis(); return;
-      }catch(e){ lastErr=e; }
-    }
-    fetchMsg.textContent="❌ Could not fetch hiscores — try another mode or Safari settings.";
-    fetchMsg.className="error small"; showDebug('Hiscores failed: ' + (lastErr && (lastErr.message||String(lastErr))));
+  return stats;
+}
+fetchBtn.onclick = async ()=>{
+  const rsn = rsnEl.value.trim(); if(!rsn) return alert("Enter RSN first");
+  try{
+    state.hiscores = await fetchHiscores(rsn, modeEl.value);
+    const cur = state.hiscores[state.skillIdx] || {level:1,xp:0};
+    curLevelEl.textContent = cur.level; curXpEl.textContent = cur.xp.toLocaleString();
     updateKpis();
-  }
-  function parseHiscores(lines){
-    const stats={};
-    for(let i=0;i<lines.length;i++){
-      const p=lines[i].split(","); if(p.length<3) continue;
-      const rank = Number(p[0]); const level = Number(p[1]); const xp = Number(p[2]);
-      stats[i] = { rank: isFinite(rank)?rank:-1, level: isFinite(level)?Math.max(0,level):0, xp: isFinite(xp)?Math.max(0,xp):0 };
-    }
-    state.hiscores=stats;
-  }
+  }catch(e){ alert("Hiscore fetch failed: "+e.message); }
+};
 
-  document.getElementById("fetchBtn").addEventListener("click", ()=>{
-    state.rsn=rsnEl.value.trim(); state.mode=modeEl.value; if(!state.rsn){ fetchMsg.textContent="Enter an RSN first."; fetchMsg.className="error small"; return; }
-    fetchHiscores(state.rsn, state.mode);
-  });
+/* ---------- Math / KPIs ---------- */
+function ceil2(n){ return Math.ceil(n*100)/100 }
+function sumAllocated(){ return ceil2(state.weeks.flat().reduce((a,b)=>a+(+b||0),0)); }
 
-  // Init
-  try{ const saved=localStorage.getItem("osrs_skilling_plan_v4_3d"); if(saved) state=JSON.parse(saved); }catch(e){ showDebug('load saved failed: '+e); }
-  // Populate
-  (function populateLevels(){ let opts=[]; for (let L=1; L<=126; L++){ opts.push(`<option value="\${L}" \${L===state.targetLevel?'selected':''}>\${L}</option>`);} targetSel.innerHTML=opts.join(""); })();
-  (function buildSkill(){ const panel=document.getElementById("skillPanel"); const grid=document.createElement("div"); grid.className="skill-grid";
-    SKILLS.forEach(s=>{ const item=document.createElement("div"); item.className="skill-item"; const img=document.createElement("img");
-      const local=\`assets/skills/\${s.key}.png\`; const wiki=\`https://oldschool.runescape.wiki/images/\${encodeURIComponent(WIKI_ICON[s.key])}\`;
-      img.src=local; img.alt=s.name; img.onerror=()=>{ img.onerror=null; img.src=wiki; };
-      const span=document.createElement("span"); span.textContent=s.name; item.appendChild(img); item.appendChild(span);
-      item.addEventListener("click", ()=>{ state.skillIdx=s.idx; state.skillKey=s.key; document.getElementById('skillIcon').src=local; document.getElementById('skillLabel').textContent=s.name; document.getElementById('skillPanel').style.display='none'; updateKpis(); });
-      grid.appendChild(item); });
-    panel.appendChild(grid);
-    document.getElementById("skillBtn").addEventListener("click", ()=>{ panel.style.display = (panel.style.display==='block') ? 'none' : 'block'; });
-    window.addEventListener("click", (e)=>{ if(!document.getElementById("skillPicker").contains(e.target)) panel.style.display='none'; });
-  })();
-  (function mount(){ document.getElementById('appRoot').style.visibility='visible'; mountWeeks(); updateKpis(); })();
+function updateKpis(){
+  const cur=(state.hiscores && state.hiscores[state.skillIdx])?state.hiscores[state.skillIdx]:{level:1,xp:0};
+  curLevelEl.textContent=cur.level||1;
+  curXpEl.textContent=(cur.xp||0).toLocaleString();
+
+  state.targetLevel = +targetSel.value || state.targetLevel;
+  state.xpPerHour   = +xpPerHourEl.value || state.xpPerHour;
+
+  // ----- Target level & XP (single source of truth)
+  const tgtLevel = Number(targetSel.value || state.targetLevel || 1);
+  const tgtXp    = XP[tgtLevel] || 0;
+  tgtXpEl.textContent = tgtXp.toLocaleString();
+
+  // ----- XP to goal (friendly + exact)
+  const curLevel = cur.level || 1;
+  const curXp    = cur.xp || 0;
+
+  // exact shortfall to the chosen level’s threshold
+  const shortfall = Math.max(0, tgtXp - curXp);
+
+  // If target ≤ current level, show 0 but surface exact shortfall as a tiny note
+  let xpRemaining = (tgtLevel <= curLevel) ? 0 : shortfall;
+  xpRemEl.textContent = xpRemaining.toLocaleString();
+
+  // Optional tiny note (below the KPI)
+  let note = document.getElementById('thresholdNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'thresholdNote';
+    note.style.fontSize = '12px';
+    note.style.color = '#9aa3b2';
+    note.style.marginTop = '4px';
+    xpRemEl.parentElement.parentElement.appendChild(note);
+  }
+  note.textContent = (tgtLevel <= curLevel && shortfall > 0)
+    ? `Below level threshold by ${shortfall.toLocaleString()} XP (exact).`
+    : '';
+
+  // Hours math
+  const hoursNeeded = xpRemaining<=0 ? 0 : ceil2(xpRemaining / Math.max(1,state.xpPerHour));
+  const allocated   = sumAllocated();
+  const remaining   = Math.max(0, ceil2(hoursNeeded - allocated));
+  hoursNeededEl.textContent = hoursNeeded.toFixed(hoursNeeded%1?2:0);
+  hoursAllocEl.textContent  = allocated.toFixed(allocated%1?2:0);
+  hoursRemEl.textContent    = remaining.toFixed(remaining%1?2:0);
+
+  const pct = hoursNeeded>0 ? Math.min(100, Math.max(0,(allocated/hoursNeeded)*100)) : 0;
+  progressFill.style.width = pct + "%";
+
+  etaEl.textContent = "—"; // (Optional: add date projection later)
+
+  try{ localStorage.setItem("osrs_plan_v43g_fix", JSON.stringify(state)); }catch{}
+}
+
+targetSel.onchange = updateKpis;
+xpPerHourEl.oninput = updateKpis;
+
+/* ---------- Save/Load/Export/Import/Reset ---------- */
+document.getElementById("saveBtn").onclick = ()=>{ try{ localStorage.setItem("osrs_plan_v43g_fix", JSON.stringify(state)); alert("Saved."); }catch(e){ alert("Save failed: "+e.message); } };
+document.getElementById("loadBtn").onclick = ()=>{ try{ const s=localStorage.getItem("osrs_plan_v43g_fix"); if(s){ state=JSON.parse(s); mountWeeks(); updateKpis(); alert("Loaded."); } else alert("No save yet."); }catch(e){ alert("Load failed: "+e.message); } };
+document.getElementById("resetBtn").onclick= ()=>{ if(confirm("Reset plan?")){ state.weeks=[Array(7).fill(0)]; mountWeeks(); updateKpis(); } };
+document.getElementById("exportBtn").onclick= ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="osrs_skilling_plan.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
+document.getElementById("importBtn").onclick= ()=> document.getElementById("importInput").click();
+document.getElementById("importInput").onchange = (e)=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); mountWeeks(); updateKpis(); alert("Imported."); }catch(err){ alert("Import failed: "+err.message); } }; r.readAsText(f); };
+
+/* ---------- Init ---------- */
+try{ const s=localStorage.getItem("osrs_plan_v43g_fix"); if(s) state=JSON.parse(s); }catch{}
+mountWeeks(); updateKpis();
 })();
 </script>
 
-<!-- Bulletproof splash removal -->
 <script>
-(function(){
-  function hideSplash(){
-    const root = document.getElementById('appRoot');
-    if (root) root.style.visibility = 'visible';
-    const s = document.getElementById('splash');
-    if (s) { s.classList.add('fade-out'); setTimeout(()=> s && s.remove(), 600); }
-  }
-  document.addEventListener('DOMContentLoaded', hideSplash, {once:true});
-  window.addEventListener('load', hideSplash, {once:true});
-  window.addEventListener('error', hideSplash, {once:true});
-  setTimeout(hideSplash, 1800);
-})();
-</script>
-
-<!-- Service worker: allow bypass with ?no-sw=1 -->
-<script>
-if ('serviceWorker' in navigator && !location.search.includes('no-sw=1')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-  });
+if('serviceWorker' in navigator && !location.search.includes('no-sw=1')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 }
 </script>
 </body>
