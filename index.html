@@ -271,7 +271,7 @@ function updateKpis(){
 
   // ----- Target level & XP (single source of truth)
   const tgtLevel = Number(targetSel.value || state.targetLevel || 1);
-  const tgtXp    = XP[tgtLevel] || 0;
+  const tgtXp = XP[tgtLevel - 1] || 0;
   tgtXpEl.textContent = tgtXp.toLocaleString();
 
   // ----- XP to goal (friendly + exact)
